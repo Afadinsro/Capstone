@@ -7,13 +7,13 @@
     <string name="title_map">Map</string>
     <string name="title_contacts">Contacts</string>
 
-    <!--MENU TITLES-->
+    <!--BOTTOM NAV TITLES-->
     <string name="title_profile">My Profile</string>
     <string name="title_settings">Settings</string>
+
+    <!--ACTIVITY TITLES-->
+    <string name="title_activity_trending">Trending</string>
     <string name="title_activity_maps">Map</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
     <string name="title_activity_capture">Capture</string>
     <string name="title_activity_reports">Reports</string>
     <string name="title_activity_contacts">Contacts</string>

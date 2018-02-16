@@ -1,5 +1,6 @@
 package com.adino.capstone;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -18,19 +19,23 @@ public class CaptureActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_map:
-
+                    Intent mapIntent = new Intent(CaptureActivity.this, MapActivity.class);
+                    startActivity(mapIntent);
                     return true;
                 case R.id.navigation_trending:
-
+                    Intent trendingIntent = new Intent(CaptureActivity.this, TrendingActivity.class);
+                    startActivity(trendingIntent);
                     return true;
                 case R.id.navigation_capture:
-
+                    //Do nothing
                     return true;
                 case R.id.navigation_reports:
-
+                    Intent reportsIntent = new Intent(CaptureActivity.this, ReportsActivity.class);
+                    startActivity(reportsIntent);
                     return true;
                 case R.id.navigation_contacts:
-
+                    Intent contactsIntent = new Intent(CaptureActivity.this, ContactsActivity.class);
+                    startActivity(contactsIntent);
                     return true;
             }
             return false;
@@ -43,6 +48,7 @@ public class CaptureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_capture);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setSelectedItemId(R.id.navigation_capture);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
     }
