@@ -6,4 +6,8 @@
     <string name="title_trending">Trending</string>
     <string name="title_map">Map</string>
     <string name="title_contacts">Contacts</string>
+
+    <!--MENU TITLES-->
+    <string name="title_profile">My Profile</string>
+    <string name="title_settings">Settings</string>
 </resources>
