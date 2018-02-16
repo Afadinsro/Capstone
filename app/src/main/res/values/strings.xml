@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Capstone</string>
+    <!--BOTTOM NAV TITLES-->
+    <string name="title_reports">Reports</string>
+    <string name="title_capture">Capture</string>
+    <string name="title_trending">Trending</string>
+    <string name="title_map">Map</string>
+    <string name="title_contacts">Contacts</string>
+</resources>
