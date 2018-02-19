@@ -20,7 +20,7 @@ public class ReportsActivity extends AppCompatActivity {
                     startActivity(mapIntent);
                     return true;
                 case R.id.navigation_trending:
-                    Intent trendingIntent = new Intent(ReportsActivity.this, TrendingActivity.class);
+                    Intent trendingIntent = new Intent(ReportsActivity.this, MainActivity.class);
                     startActivity(trendingIntent);
                     return true;
                 case R.id.navigation_capture:

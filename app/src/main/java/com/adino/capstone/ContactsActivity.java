@@ -20,11 +20,11 @@ public class ContactsActivity extends AppCompatActivity {
                     startActivity(mapIntent);
                     return true;
                 case R.id.navigation_trending:
-                    Intent trendingIntent = new Intent(ContactsActivity.this, TrendingActivity.class);
+                    Intent trendingIntent = new Intent(ContactsActivity.this, MainActivity.class);
                     startActivity(trendingIntent);
                     return true;
                 case R.id.navigation_capture:
-                    Intent captureIntent = new Intent(ContactsActivity.this, TrendingActivity.class);
+                    Intent captureIntent = new Intent(ContactsActivity.this, MainActivity.class);
                     startActivity(captureIntent);
                     return true;
                 case R.id.navigation_reports:

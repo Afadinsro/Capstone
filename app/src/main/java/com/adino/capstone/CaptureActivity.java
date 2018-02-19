@@ -23,7 +23,7 @@ public class CaptureActivity extends AppCompatActivity {
                     startActivity(mapIntent);
                     return true;
                 case R.id.navigation_trending:
-                    Intent trendingIntent = new Intent(CaptureActivity.this, TrendingActivity.class);
+                    Intent trendingIntent = new Intent(CaptureActivity.this, MainActivity.class);
                     startActivity(trendingIntent);
                     return true;
                 case R.id.navigation_capture:
