@@ -35,18 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MapActivity"
-            android:label="@string/title_activity_maps" />
-        <activity
-            android:name=".CaptureActivity"
-            android:label="@string/title_activity_capture" />
-        <activity
-            android:name=".ReportsActivity"
-            android:label="@string/title_activity_reports" />
-        <activity
-            android:name=".ContactsActivity"
-            android:label="@string/title_activity_contacts" />
     </application>
 
 </manifest>
