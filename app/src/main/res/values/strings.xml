@@ -17,4 +17,7 @@
     <string name="title_activity_capture">Capture</string>
     <string name="title_activity_reports">Reports</string>
     <string name="title_activity_contacts">Contacts</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

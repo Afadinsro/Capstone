@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
             switch (item.getItemId()) {
                 case R.id.navigation_map:
+                    fragmentTransaction.replace().commit();
                     Intent mapIntent = new Intent(MainActivity.this, MapActivity.class);
                     startActivity(mapIntent);
                     return true;
