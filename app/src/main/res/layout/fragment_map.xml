@@ -10,4 +10,11 @@
         android:layout_height="match_parent"
         android:text="@string/hello_map_fragment" />
 
+    <include layout="@layout/map"
+        android:id="@+id/fragment_map_include"
+        android:layout_width="220dp"
+        android:layout_height="104dp"
+        android:layout_marginBottom="64dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"/>
 </FrameLayout>
