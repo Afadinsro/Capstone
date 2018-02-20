@@ -1,44 +1,38 @@
 package com.adino.capstone;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
+        ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
+        TrendingFragment.OnFragmentInteractionListener{
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             switch (item.getItemId()) {
                 case R.id.navigation_map:
-                    fragmentTransaction.replace().commit();
-                    Intent mapIntent = new Intent(MainActivity.this, MapActivity.class);
-                    startActivity(mapIntent);
+                    fragmentTransaction.replace(R.id.content, new MapFragment()).commit();
                     return true;
                 case R.id.navigation_trending:
-                    //Do nothing
-                    return true;
-                case R.id.navigation_capture:
-                    Intent captureIntent = new Intent(MainActivity.this, CaptureActivity.class);
-                    startActivity(captureIntent);
+                    fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
                     return true;
                 case R.id.navigation_reports:
-                    Intent reportsIntent = new Intent(MainActivity.this, ReportsActivity.class);
-                    startActivity(reportsIntent);
+                    fragmentTransaction.replace(R.id.content, new ReportsFragment()).commit();
                     return true;
                 case R.id.navigation_contacts:
-                    Intent contactsIntent = new Intent(MainActivity.this, ContactsActivity.class);
-                    startActivity(contactsIntent);
+                    fragmentTransaction.replace(R.id.content, new ContactsFragment()).commit();
                     return true;
             }
             return false;
@@ -51,9 +45,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setSelectedItemId(R.id.navigation_trending);
+        navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
+        // Initialize content view to Trending
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
 }
