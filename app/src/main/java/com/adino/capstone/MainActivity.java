@@ -9,9 +9,12 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
-        TrendingFragment.OnFragmentInteractionListener{
+        TrendingFragment.OnFragmentInteractionListener, OnMapReadyCallback{
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -59,4 +62,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+    }
 }
