@@ -2,6 +2,7 @@ package com.adino.capstone;
 
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,11 @@ import android.view.ViewGroup;
  */
 public class PictureFragment extends Fragment {
 
-
+    /**
+     * Floating Action Buttons
+     */
+    private FloatingActionButton fabSwitchToVideo;
+    
     public PictureFragment() {
         // Required empty public constructor
     }

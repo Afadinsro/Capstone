@@ -18,6 +18,9 @@
     <string name="title_activity_reports">Reports</string>
     <string name="title_activity_contacts">Contacts</string>
 
+    <!--CONTENT DESCRIPTIONS-->
+    <string name="capture_content_description_img_view">Gallery</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_trending_fragment">Hello Trending fragment</string>
     <string name="hello_contacts_fragment">Hello Contacts fragment</string>

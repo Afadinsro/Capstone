@@ -12,6 +12,8 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,7 +31,7 @@ public class CaptureActivity extends AppCompatActivity {
 
     private static final String TAG = "CaptureActivity";
     private TextureView textureView;
-    private FloatingActionButton fab;
+
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -50,40 +52,24 @@ public class CaptureActivity extends AppCompatActivity {
     private Handler backgroundHandler;
     private HandlerThread backgroundHandlerThread;
 
+    /**
+     * Floating Action Buttons
+     */
+    private FloatingActionButton fabSwitchToVideo;
+    private FloatingActionButton fabSwitchToPicture;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_capture);
 
-        textureView = (TextureView) findViewById(R.id.textureView);
-        assert textureView != null;
-        textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                openCamera();
-            }
+        // Initialize content view to Picture fragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.capture_placeholder, new PictureFragment()).commit();
 
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        fabSwitchToVideo = (FloatingActionButton)findViewById(R.id.fab_capture_video);
 
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takePicture();
-            }
-        });
     }
 
     private void takePicture() {

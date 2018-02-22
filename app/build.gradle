@@ -19,14 +19,19 @@ android {
     }
 }
 
+ext{
+    supportVersion = "26.1.0"
+    firebaseVersion = "11.4.2"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
+    implementation "com.android.support:appcompat-v7:$supportVersion"
+    implementation "com.android.support:design:$supportVersion"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.android.support:support-vector-drawable:26.1.0'
-    implementation 'com.google.firebase:firebase-database:11.4.2'
-    implementation 'com.android.support:support-v4:26.1.0'
+    implementation "com.android.support:support-vector-drawable:$supportVersion"
+    implementation "com.google.firebase:firebase-database:$firebaseVersion"
+    implementation "com.android.support:support-v4:$supportVersion"
     implementation 'com.google.android.gms:play-services-maps:11.4.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'

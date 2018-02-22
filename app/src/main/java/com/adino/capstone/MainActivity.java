@@ -1,22 +1,15 @@
 package com.adino.capstone;
 
-import android.*;
-import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -54,7 +47,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
                     return true;
                 case R.id.navigation_capture:
-
+                    Intent toCaptureActivity = new Intent(MainActivity.this, CaptureActivity.class);
+                    startActivity(toCaptureActivity);
                     return true;
                 case R.id.navigation_reports:
                     fragmentTransaction.replace(R.id.content, new ReportsFragment()).commit();
@@ -85,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
+
+
     }
 
     @Override
