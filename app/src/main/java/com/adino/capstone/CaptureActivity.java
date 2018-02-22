@@ -52,11 +52,7 @@ public class CaptureActivity extends AppCompatActivity {
     private Handler backgroundHandler;
     private HandlerThread backgroundHandlerThread;
 
-    /**
-     * Floating Action Buttons
-     */
-    private FloatingActionButton fabSwitchToVideo;
-    private FloatingActionButton fabSwitchToPicture;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +64,7 @@ public class CaptureActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.capture_placeholder, new PictureFragment()).commit();
 
-        fabSwitchToVideo = (FloatingActionButton)findViewById(R.id.fab_capture_video);
+
 
     }
 
