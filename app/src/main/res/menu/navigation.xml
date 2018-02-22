@@ -12,6 +12,11 @@
         android:title="@string/title_trending" />
 
     <item
+        android:id="@+id/navigation_capture"
+        android:icon="@drawable/ic_photo_camera"
+        android:title="@string/title_capture" />
+
+    <item
         android:id="@+id/navigation_reports"
         android:icon="@drawable/ic_receipt"
         android:title="@string/title_reports" />
