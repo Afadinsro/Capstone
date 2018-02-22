@@ -20,7 +20,7 @@
         android:paddingEnd="40dp"
         android:paddingStart="40dp"
         android:paddingTop="20dp"
-        android:background="@android:color/black">
+        android:background="@android:color/transparent">
 
         <ImageView
             android:id="@+id/gallery_thumbnail"
@@ -29,14 +29,14 @@
             android:layout_gravity="center_vertical|start"
             app:srcCompat="@drawable/ic_image_black_24dp"
             android:contentDescription="@string/capture_content_description_img_view"
-            android:tint="@android:color/white"/>
+            android:tint="@android:color/darker_gray"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_capture_pic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            app:backgroundTint="@android:color/white"
+            app:backgroundTint="@android:color/darker_gray"
             app:fabSize="normal" />
 
         <android.support.design.widget.FloatingActionButton

@@ -8,8 +8,7 @@
     <TextureView
         android:id="@+id/textureView_picture"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="95dp"/>
+        android:layout_height="match_parent"/>
 
     <FrameLayout
         android:id="@+id/frame_button_controls"
@@ -30,7 +29,7 @@
             android:layout_gravity="center_vertical|start"
             app:srcCompat="@drawable/ic_image_black_24dp"
             android:contentDescription="@string/capture_content_description_img_view"
-            android:tint="@android:color/white"/>
+            android:tint="@android:color/darker_gray"/>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_capture_video"
