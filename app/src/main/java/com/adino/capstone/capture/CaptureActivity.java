@@ -1,7 +1,6 @@
-package com.adino.capstone;
+package com.adino.capstone.capture;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -11,7 +10,6 @@ import android.hardware.camera2.CaptureRequest;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -21,9 +19,9 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 
-import com.google.firebase.database.FirebaseDatabase;
+import com.adino.capstone.R;
+import com.adino.capstone.capture.PictureFragment;
 
 import java.io.File;
 
