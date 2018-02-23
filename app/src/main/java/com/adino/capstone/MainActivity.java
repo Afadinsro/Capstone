@@ -76,11 +76,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_capture:
                     /*Intent toCaptureActivity = new Intent(MainActivity.this, CaptureActivity.class);
                     startActivity(toCaptureActivity);*/
-                    if(fab_capture_video.getVisibility() == View.VISIBLE){
-                        toggleCaptureButtons(View.GONE);
-                    }else {
-                        toggleCaptureButtons(View.VISIBLE);
-                    }
+                    toggleCaptureButtons(View.VISIBLE);
                     return true;
                 case R.id.navigation_reports:
                     toggleCaptureButtons(View.GONE);
@@ -96,6 +92,26 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     return true;
             }
             return false;
+        }
+    };
+
+    private BottomNavigationView.OnNavigationItemReselectedListener onNavigationItemReselectedListener
+            = new BottomNavigationView.OnNavigationItemReselectedListener() {
+        @Override
+        public void onNavigationItemReselected(@NonNull MenuItem item) {
+            switch (item.getItemId()){
+                case R.id.navigation_map:
+                case R.id.navigation_trending:
+                    break;
+                case R.id.navigation_capture:
+                    toggleCaptureButtons(View.GONE);
+                    navigation.setSelectedItemId(currentNavItem);
+                    break;
+                case R.id.navigation_reports:
+                case R.id.navigation_contacts:
+                    break;
+
+            }
         }
     };
 
@@ -153,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
         // Initialize content view to Trending
         FragmentManager fragmentManager = getSupportFragmentManager();
