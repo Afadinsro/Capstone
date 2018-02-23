@@ -8,7 +8,8 @@
     <TextureView
         android:id="@+id/textureView_picture"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="visible" />
 
     <FrameLayout
         android:id="@+id/frame_button_controls"
@@ -16,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:paddingBottom="20dp"
+        android:paddingBottom="40dp"
         android:paddingEnd="40dp"
         android:paddingStart="40dp"
         android:paddingTop="20dp"
@@ -36,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            app:backgroundTint="@android:color/darker_gray"
+            app:backgroundTint="@android:color/white"
             app:fabSize="normal" />
 
         <android.support.design.widget.FloatingActionButton
@@ -44,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|end"
-            android:background="@android:color/holo_red_dark"
+            android:background="@color/red"
             android:tint="@android:color/white"
             app:fabSize="mini"
             app:srcCompat="@drawable/ic_videocam_black_24dp" />

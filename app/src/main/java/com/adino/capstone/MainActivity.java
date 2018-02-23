@@ -2,8 +2,11 @@ package com.adino.capstone;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.adino.capstone.capture.CaptureActivity;
@@ -30,6 +34,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private static final int CAMERA_REQUEST = 244;
     private static final String TAG = "MainActivity";
     private static final int ERROR_DIALOG_REQUEST = 900;
+    private static final int REQUEST_CAMERA_PERMISSION = 200;
+
+    private FloatingActionButton fab_capture_picture;
+    private FloatingActionButton fab_capture_video;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -41,25 +49,35 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
             switch (item.getItemId()) {
                 case R.id.navigation_map:
+                    toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new MapFragment()).commit();
                     return true;
                 case R.id.navigation_trending:
+                    toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
                     return true;
                 case R.id.navigation_capture:
-                    Intent toCaptureActivity = new Intent(MainActivity.this, CaptureActivity.class);
-                    startActivity(toCaptureActivity);
+                    /*Intent toCaptureActivity = new Intent(MainActivity.this, CaptureActivity.class);
+                    startActivity(toCaptureActivity);*/
+                    toggleCaptureButtons(View.VISIBLE);
                     return true;
                 case R.id.navigation_reports:
+                    toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ReportsFragment()).commit();
                     return true;
                 case R.id.navigation_contacts:
+                    toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ContactsFragment()).commit();
                     return true;
             }
             return false;
         }
     };
+
+    private void toggleCaptureButtons(int visibility) {
+        fab_capture_picture.setVisibility(visibility);
+        fab_capture_video.setVisibility(visibility);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +88,21 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        fab_capture_picture = (FloatingActionButton)findViewById(R.id.fab_capture_picture);
+        fab_capture_picture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        fab_capture_video = (FloatingActionButton)findViewById(R.id.fab_capture_video);
+        fab_capture_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
@@ -127,4 +160,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
         return false;
     }
+
+
 }

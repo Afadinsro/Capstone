@@ -11,7 +11,9 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"/>
+        android:orientation="vertical">
+
+    </FrameLayout>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -24,5 +26,41 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_capture_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toTopOf="@+id/fab_capture_picture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_videocam_black_48dp"
+        android:focusable="true"
+        app:backgroundTint="@color/colorPrimaryDark"
+        android:tint="@color/white"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_capture_picture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toTopOf="@+id/navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_camera_black_48dp"
+        android:focusable="true"
+        app:backgroundTint="@color/colorPrimaryDark"
+        android:tint="@color/white"/>
 
 </android.support.constraint.ConstraintLayout>

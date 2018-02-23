@@ -6,9 +6,9 @@
     tools:context="com.adino.capstone.capture.PictureFragment">
 
     <TextureView
-        android:id="@+id/textureView_picture"
+        android:id="@+id/textureView_video"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <FrameLayout
         android:id="@+id/frame_button_controls"
