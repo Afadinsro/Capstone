@@ -21,8 +21,8 @@ android {
 
 ext {
     supportVersion = "26.1.0"
-    playFirebaseVersion = "11.8.0"
-    firebaseUIVersion = "3.2.1"
+    playFirebaseVersion = "11.4.2"
+    firebaseUIVersion = "3.1.0"
     glideVersion = "4.6.1"
 }
 
