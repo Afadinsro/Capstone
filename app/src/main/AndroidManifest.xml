@@ -46,11 +46,13 @@
         <activity
             android:name=".capture.CaptureActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity android:name=".capture.DetailsActivity"></activity>
+
+        <activity android:name=".capture.DetailsActivity"
+            android:label="@string/title_activity_details"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.example.android.fileprovider"
+            android:authorities="com.adino.capstone.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

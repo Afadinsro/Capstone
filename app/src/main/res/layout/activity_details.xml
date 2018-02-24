@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.adino.capstone.capture.DetailsActivity">
 
-</android.support.constraint.ConstraintLayout>
+
+    <ToggleButton
+        android:id="@+id/tbtn_fire"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:text="@string/tbtn_fire"
+        android:textOff=""
+        android:textOn=""/>
+
+</RelativeLayout>

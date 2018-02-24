@@ -17,9 +17,30 @@
     <string name="title_activity_capture">Capture</string>
     <string name="title_activity_reports">Reports</string>
     <string name="title_activity_contacts">Contacts</string>
+    <string name="title_activity_details">Details</string>
+
+    <!--TOGGLE BUTTON TITLES-->
+    <string name="tbtn_fire">Fire</string>
+    <string name="tbtn_earthquake">Earthquake</string>
+    <string name="tbtn_flood">Flood</string>
+    <string name="tbtn_epidemic">Epidemic</string>
+    <string name="tbtn_motor">Motor</string>
+    <string name="tbtn_meteorological">Meteorological</string>
+    <string name="tbtn_text_off"></string>
+    <string name="tbtn_text_on"></string>
+    <string name="btn_submit_report">Submit</string>
 
     <!--CONTENT DESCRIPTIONS-->
     <string name="capture_content_description_img_view">Gallery</string>
+
+    <!-- Text fields Texts -->
+    <string name="txt_caption_placeholder">Write a caption&#8230;</string>
+
+    <!-- Labels -->
+    <string name="lbl_caption">Caption:</string>
+    <string name="lbl_category">Category:</string>
+    <string name="lbl_default">Label:</string>
+    <string name="lbl_location">Location:</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_trending_fragment">Hello Trending fragment</string>
