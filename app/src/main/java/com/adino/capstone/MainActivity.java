@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.adino.capstone.capture.CaptureActivity;
 import com.adino.capstone.capture.DetailsActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -137,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             @Override
             public void onClick(View v) {
                 if(!camera_permission_granted) {
-                    requestCameraPermission();
+                    requestCameraStoragePermission();
                     // Camera permission granted
                     if(camera_permission_granted) {
                         Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -154,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             @Override
             public void onClick(View v) {
                 if(!camera_permission_granted) {
-                    requestCameraPermission();
+                    requestCameraStoragePermission();
                     // Camera permission granted
                     if(camera_permission_granted) {
                         Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -192,11 +191,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestCameraPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{
-                android.Manifest.permission.CAMERA,
+    private void requestCameraStoragePermission(){
+        String[] permissions = {android.Manifest.permission.CAMERA,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        }, REQUEST_CAMERA_PERMISSION);
+        };
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_CAMERA_PERMISSION);
     }
 
     private void setRequestCameraPermission(boolean granted){
