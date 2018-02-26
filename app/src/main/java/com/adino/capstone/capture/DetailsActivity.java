@@ -87,6 +87,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      * Text Fields
      */
     private EditText txtCaption;
+    private EditText txtOtherCategory;
     private TextView txtDate;
 
     /**
@@ -130,8 +131,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         tbtnMeteorological = (ToggleButton)findViewById(R.id.tbtn_meteorological);
         tbtnMotorAccident = (ToggleButton)findViewById(R.id.tbtn_motor);
 
+        txtOtherCategory = (EditText)findViewById(R.id.txt_other);
         radioOther = (RadioButton)findViewById(R.id.radio_other);
         radioOther.setChecked(false);
+        radioOther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                radioOtherSelected();
+                txtOtherCategory.setEnabled(true);
+            }
+        });
 
         fabSend = (FloatingActionButton) findViewById(R.id.fab_report_submit);
         fabSend.setEnabled(false);
@@ -339,6 +348,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
+    private void disableOtherSection(){
+        txtOtherCategory.setEnabled(false);
+        radioOther.setChecked(false);
+    }
+
     /**
      *
      */
@@ -347,10 +361,71 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    //tbtnFire.setBackgroundResource(R.drawable.ic_auto_checked);
+                    tbtnFire.setBackgroundResource(R.drawable.ic_flame_checked);
                     toggleAllOthers(tbtnFire);
+                    disableOtherSection();
                 } else {
-                    //tbtnFire.setBackgroundResource(R.drawable.ic_auto_unchecked);
+                    tbtnFire.setBackgroundResource(R.drawable.ic_flame);
+                }
+            }
+        });
+        tbtnFlood.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tbtnFlood.setBackgroundResource(R.drawable.ic_flood_checked);
+                    toggleAllOthers(tbtnFlood);
+                    disableOtherSection();
+                } else {
+                    tbtnFlood.setBackgroundResource(R.drawable.ic_flood);
+                }
+            }
+        });
+        tbtnEpidemic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tbtnEpidemic.setBackgroundResource(R.drawable.ic_medicines_checked);
+                    toggleAllOthers(tbtnEpidemic);
+                    disableOtherSection();
+                } else {
+                    tbtnEpidemic.setBackgroundResource(R.drawable.ic_medicines);
+                }
+            }
+        });
+        tbtnEarthquake.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tbtnEarthquake.setBackgroundResource(R.drawable.ic_earthquake_checked);
+                    toggleAllOthers(tbtnEarthquake);
+                    disableOtherSection();
+                } else {
+                    tbtnEarthquake.setBackgroundResource(R.drawable.ic_earthquake);
+                }
+            }
+        });
+        tbtnMeteorological.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tbtnMeteorological.setBackgroundResource(R.drawable.ic_storm_checked);
+                    toggleAllOthers(tbtnMeteorological);
+                    disableOtherSection();
+                } else {
+                    tbtnMeteorological.setBackgroundResource(R.drawable.ic_storm);
+                }
+            }
+        });
+        tbtnMotorAccident.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    tbtnMotorAccident.setBackgroundResource(R.drawable.ic_car_collision_checked);
+                    toggleAllOthers(tbtnMotorAccident);
+                    disableOtherSection();
+                } else {
+                    tbtnMotorAccident.setBackgroundResource(R.drawable.ic_car_collision);
                 }
             }
         });
@@ -364,7 +439,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private void toggleAllOthers(ToggleButton selected){
         Log.d(TAG, "toggleAllOthers: called");
         selectedTbtn = selected;
-        ToggleButton[] toggleButtons = {tbtnFire, tbtnFire, tbtnEpidemic, tbtnEarthquake,
+        ToggleButton[] toggleButtons = {tbtnFire, tbtnFlood, tbtnEpidemic, tbtnEarthquake,
                 tbtnMotorAccident, tbtnMeteorological};
         for(ToggleButton tbtn: toggleButtons){
             if(tbtn != selected){

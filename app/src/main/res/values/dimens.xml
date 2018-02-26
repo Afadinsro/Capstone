@@ -5,4 +5,5 @@
 
     <dimen name="tbtn_size">40dp</dimen>
     <dimen name="txt_size">16sp</dimen>
+    <dimen name="img_report_pic">200dp</dimen>
 </resources>
