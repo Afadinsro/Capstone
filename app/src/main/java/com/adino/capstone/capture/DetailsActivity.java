@@ -1,6 +1,7 @@
 package com.adino.capstone.capture;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -19,11 +20,13 @@ import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.adino.capstone.MainActivity;
@@ -89,12 +92,13 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      */
     private EditText txtCaption;
     private EditText txtOtherCategory;
+    private EditText txtLocation;
     private TextView txtDate;
 
     /**
      * Report variables
      */
-    private DisasterCategory category;
+    private String category;
     private String caption;
     private String date;
     private String imageURL = "";
@@ -123,6 +127,9 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getLocationPermission();
+        //InputMethodManager
+        final InputMethodManager inputMethodManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
 
         //Initialize Toggle buttons
         tbtnEarthquake = (ToggleButton)findViewById(R.id.tbtn_earthquake);
@@ -140,38 +147,21 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             public void onClick(View v) {
                 radioOtherSelected();
                 txtOtherCategory.setEnabled(true);
+                assert inputMethodManager != null;
+                inputMethodManager.showSoftInput(txtOtherCategory, InputMethodManager.SHOW_IMPLICIT);
             }
         });
 
         fabSend = (FloatingActionButton) findViewById(R.id.fab_report_submit);
-        fabSend.setEnabled(false);
 
         // Display date
         txtDate = (TextView)findViewById(R.id.txt_date);
         txtDate.setText(getCurrentDate());
 
         txtCaption = (EditText)findViewById(R.id.txt_report_caption);
-        // Enable Send button when there's text to send
-        txtCaption.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                fabSend.setEnabled(false);
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.toString().trim().length() > 0) {
-                    fabSend.setEnabled(true);
-                } else {
-                    fabSend.setEnabled(false);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
         txtCaption.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_CAPTION_LENGTH_LIMIT)});
+
+        txtLocation = (EditText)findViewById(R.id.txt_report_location_words);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
@@ -188,18 +178,71 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Submit button clicked");
-                //uploadImage();
+
+                if(txtCaption.getText().toString().isEmpty()){
+                    // No caption entered
+                    Snackbar.make(fabSend, "You need to enter a caption...", Snackbar.LENGTH_LONG)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    txtCaption.setFocusableInTouchMode(true);
+                                    txtCaption.requestFocus();
+                                    assert inputMethodManager != null;
+                                    inputMethodManager.showSoftInput(txtCaption, InputMethodManager.SHOW_IMPLICIT);
+                                }
+                            }).show();
+                }else if(!radioOther.isChecked() && !isAnyCategorySelected()) {
+                    // No category selected and other not checked
+                    Snackbar.make(fabSend, "You need to select a category...", Snackbar.LENGTH_LONG)
+                            .setAction("OK", null).show();
+                }else if(radioOther.isChecked() && txtOtherCategory.getText().toString().isEmpty()){
+                    // Other checked but no text entered for category
+                    Snackbar.make(fabSend, "You need to enter a category...", Snackbar.LENGTH_LONG)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    txtOtherCategory.setFocusableInTouchMode(true);
+                                    txtOtherCategory.requestFocus();
+
+                                    assert inputMethodManager != null;
+                                    inputMethodManager.showSoftInput(txtOtherCategory, InputMethodManager.SHOW_IMPLICIT);
+                                }
+                            }).show();
+                }else if(txtLocation.getText().toString().isEmpty()){
+                    // No location in words entered
+                    Snackbar.make(fabSend, "Enter location in words for effective response...", Snackbar.LENGTH_LONG)
+                            .setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    txtLocation.setFocusableInTouchMode(true);
+                                    txtLocation.requestFocus();
+                                    assert inputMethodManager != null;
+                                    inputMethodManager.showSoftInput(txtLocation, InputMethodManager.SHOW_IMPLICIT);
+                                }
+                            }).show();
+                }else {
+                    // All fields validated
+                    Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
+                    //uploadImage();
+                }
 
             }
         });
+    }
+
+    /**
+     * CHecks if any category has been selected
+     * @return True if a category has been selected and false otherwise
+     */
+    private boolean isAnyCategorySelected() {
+        return tbtnFlood.isChecked() || tbtnFire.isChecked() || tbtnMotorAccident.isChecked() ||
+                tbtnMeteorological.isChecked() || tbtnEarthquake.isChecked() || tbtnEpidemic.isChecked();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         attachToggleStateListeners();
-        //Set Automobile by default
-        tbtnFire.setChecked(true);
         //attach child event listener
         attachDatabaseReadListener();
     }
@@ -501,7 +544,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 assert downloadUrl != null;
                 imageURL = downloadUrl.toString();
 
-                category = getSelectedCategory(selectedTbtn);
+                category = getSelectedCategory(selectedTbtn).toString();
                 date = getCurrentDate();
                 caption = getCaption();
                 Report report = new Report(caption, date, category, imageURL, location);
