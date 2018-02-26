@@ -47,8 +47,14 @@
             android:name=".capture.CaptureActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
-        <activity android:name=".capture.DetailsActivity"
-            android:label="@string/title_activity_details"/>
+        <activity
+            android:name=".capture.DetailsActivity"
+            android:label="@string/title_activity_details"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity"/>
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
