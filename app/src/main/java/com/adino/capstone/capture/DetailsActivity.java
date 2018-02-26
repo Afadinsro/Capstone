@@ -1,11 +1,15 @@
 package com.adino.capstone.capture;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,26 +18,36 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
+import com.adino.capstone.model.Report;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class DetailsActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -69,7 +83,21 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference messagesDatabaseReference;
 
+    /**
+     * Text Fields
+     */
     private EditText txtCaption;
+    private TextView txtDate;
+
+    /**
+     * Report variables
+     */
+    private DisasterCategory category;
+    private String caption;
+    private String date;
+    private String imageURL = "";
+    private String videoURL = "";
+    private String location = "";
 
     /**
      * Buttons
@@ -83,6 +111,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
     private ImageView imgReportPic;
     private byte[] photo;
+    private String mCurrentPhotoPath;
 
 
     @Override
@@ -106,6 +135,10 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
         fabSend = (FloatingActionButton) findViewById(R.id.fab_report_submit);
         fabSend.setEnabled(false);
+
+        // Display date
+        txtDate = (TextView)findViewById(R.id.txt_date);
+        txtDate.setText(getCurrentDate());
 
         txtCaption = (EditText)findViewById(R.id.txt_report_caption);
         // Enable Send button when there's text to send
@@ -135,12 +168,20 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         firebaseDatabase = FirebaseDatabase.getInstance();
         messagesDatabaseReference = firebaseDatabase.getReference().child("reports");
 
+        // Display captured image
         imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
         photo = getIntent().getByteArrayExtra("image");
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
 
+        fabSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick: Submit button clicked");
+                //uploadImage();
 
+            }
+        });
     }
 
     @Override
@@ -335,5 +376,71 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void radioOtherSelected(){
         toggleAllOthers(null);
+    }
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
+        String imageFileName = "PHOTO_" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,      /* prefix */
+                ".jpg",      /* suffix */
+                storageDir         /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    /**
+     *
+     */
+    private void uploadImage(){
+        try {
+            File imageFile = createImageFile();
+            Uri file = Uri.fromFile(imageFile);
+            StorageReference photoRef = mPhotosStorageReference.child(file.getLastPathSegment());
+
+            // Create file metadata including the content type
+            StorageMetadata metadata = new StorageMetadata.Builder()
+                    .setContentType("image/jpg")
+                    .build();
+            uploadTask = photoRef.putBytes(photo, metadata);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                assert downloadUrl != null;
+                imageURL = downloadUrl.toString();
+
+                category = getSelectedCategory(selectedTbtn);
+                date = getCurrentDate();
+                caption = getCaption();
+                Report report = new Report(caption, date, category, imageURL, location);
+
+                messagesDatabaseReference.push().setValue(report);
+                Intent home = new Intent(DetailsActivity.this, MainActivity.class);
+                startActivity(home);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Snackbar.make(fabSend, "Image uploaded failed", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
     }
 }

@@ -36,6 +36,7 @@
     <string name="txt_caption_placeholder">Write a caption&#8230;</string>
     <string name="txt_location_placeholder">Location in words&#8230;</string>
     <string name="txt_other_placeholder">Category&#8230;</string>
+    <string name="txt_date_placeholder">dd-MM-yyyy</string>
 
     <!-- Labels -->
     <string name="lbl_caption">Caption:</string>
