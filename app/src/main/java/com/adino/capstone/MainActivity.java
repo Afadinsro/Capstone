@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.adino.capstone.capture.CaptureActivity;
+import com.adino.capstone.capture.DetailsActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
@@ -219,17 +220,20 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             if (resultCode == RESULT_OK) {
                 // Get Image
                 Bundle extras = data.getExtras();
+                // Ensure an image is returned from the capture
+                assert extras != null;
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 if (imageBitmap != null) {
                     imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
                 }
-                byte[] byteArray = byteArrayOutputStream.toByteArray();
-
-                //Intent goToAddDetailsIntent = new Intent(MainActivity.this, ReportDetailsActivity.class);
-                //goToAddDetailsIntent.putExtra("image", byteArray);
-                //startActivity(goToAddDetailsIntent);
+                byte[] byteArray = byteArrayOutputStream.toByteArray(); // Get byte array
+                // Navigate to DetailsActivity to add more details to the report
+                Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+                goToAddDetailsIntent.putExtra("image", byteArray); // Add image byte array as extra to the intent
+                startActivity(goToAddDetailsIntent);
             }else if(resultCode == RESULT_CANCELED){
+                // If capture was cancelled, select the previously selected nav item.
                 navigation.setSelectedItemId(currentNavItem);
             }
         }else if (requestCode == REQUEST_VIDEO_INTENT) {

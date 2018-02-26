@@ -18,7 +18,8 @@
         android:background="@drawable/ic_flame"
         android:textOff=""
         android:textOn=""
-        android:layout_marginEnd="48dp"/>
+        android:layout_marginEnd="48dp"
+        android:layout_marginStart="16dp"/>
 
     <ToggleButton
         android:id="@+id/tbtn_flood"
@@ -109,13 +110,15 @@
         android:id="@+id/txt_report_caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignStart="@id/tbtn_fire"
         android:layout_below="@+id/img_report_pic"
         android:layout_toEndOf="@id/lbl_caption"
-        android:layout_alignStart="@id/tbtn_fire"
-        android:ems="13"
-        android:textSize="@dimen/txt_size"
+        android:ellipsize="start"
+        android:ems="15"
+        android:hint="@string/txt_caption_placeholder"
         android:inputType="textPersonName"
-        android:hint="@string/txt_caption_placeholder" />
+        android:textColorLink="@color/colorPrimary"
+        android:textSize="@dimen/txt_size" />
 
     <TextView
         android:id="@+id/lbl_caption"
@@ -124,7 +127,7 @@
         android:layout_alignBaseline="@+id/txt_report_caption"
         android:layout_alignBottom="@+id/txt_report_caption"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:labelFor="@id/txt_report_caption"
         android:text="@string/lbl_caption"
         android:textColor="@color/black"/>
@@ -136,7 +139,7 @@
         android:layout_alignBaseline="@+id/tbtn_fire"
         android:layout_alignBottom="@+id/tbtn_fire"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_below="@id/lbl_caption"
         android:text="@string/lbl_category"
         android:textColor="@color/black"/>
@@ -148,7 +151,7 @@
         android:layout_alignBaseline="@+id/txt_report_location_words"
         android:layout_alignBottom="@+id/txt_report_location_words"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_below="@id/lbl_category"
         android:layout_toStartOf="@id/tbtn_fire"
         android:text="@string/lbl_location"
@@ -161,7 +164,7 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/radio_other"
         android:layout_below="@+id/radio_other"
-        android:ems="13"
+        android:ems="15"
         android:textSize="@dimen/txt_size"
         android:inputType="textPersonName"
         android:hint="@string/txt_location_placeholder" />
@@ -174,7 +177,7 @@
         android:layout_below="@+id/tbtn_meteorological"
         android:layout_marginTop="14dp"
         android:text="@string/lbl_radio_others"
-        android:enabled="false"/>
+        android:enabled="true"/>
 
     <EditText
         android:layout_width="wrap_content"
