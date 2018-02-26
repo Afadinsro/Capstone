@@ -185,6 +185,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                             .setAction("OK", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    // Set focus on caption field
                                     txtCaption.setFocusableInTouchMode(true);
                                     txtCaption.requestFocus();
                                     assert inputMethodManager != null;
@@ -201,9 +202,9 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                             .setAction("OK", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    // Set focus on other category field
                                     txtOtherCategory.setFocusableInTouchMode(true);
                                     txtOtherCategory.requestFocus();
-
                                     assert inputMethodManager != null;
                                     inputMethodManager.showSoftInput(txtOtherCategory, InputMethodManager.SHOW_IMPLICIT);
                                 }
@@ -214,6 +215,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                             .setAction("OK", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    // Set focus on location field
                                     txtLocation.setFocusableInTouchMode(true);
                                     txtLocation.requestFocus();
                                     assert inputMethodManager != null;
@@ -223,7 +225,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 }else {
                     // All fields validated
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
-                    //uploadImage();
+                    uploadImage();
                 }
 
             }
@@ -531,6 +533,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             StorageMetadata metadata = new StorageMetadata.Builder()
                     .setContentType("image/jpg")
                     .build();
+            uploadTask = photoRef.putFile(file);
             uploadTask = photoRef.putBytes(photo, metadata);
 
         }catch (IOException e){
@@ -558,7 +561,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             @Override
             public void onFailure(@NonNull Exception e) {
                 Snackbar.make(fabSend, "Image uploaded failed", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                        .setAction("Retry", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                fabSend.callOnClick();
+                            }
+                        }).show();
             }
         });
     }

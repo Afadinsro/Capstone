@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
@@ -27,6 +29,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }
         }
     };
+    private String mCurrentPhotoPath;
 
     private void toggleCaptureButtons(int visibility) {
         fab_capture_picture.setVisibility(visibility);
@@ -140,7 +148,27 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     // Camera permission granted
                     if(camera_permission_granted) {
                         Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                        // Ensure that there's a camera activity to handle the intent
+                        if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                            // Create the File where the photo should go
+                            File photoFile = null;
+                            try {
+                                photoFile = createImageFile();
+                            } catch (IOException ex) {
+                                // Error occurred while creating the File
+                            }
+                            // Continue only if the File was successfully created
+                            if (photoFile != null) {
+                                Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
+                                        "com.adino.capstone.fileprovider",
+                                        photoFile);
+                                toImageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                            }
+                        }
+
+
+
                     }
                 }else{
                     Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -156,6 +184,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     requestCameraStoragePermission();
                     // Camera permission granted
                     if(camera_permission_granted) {
+
+
                         Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                         startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
                     }
@@ -200,6 +230,27 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     private void setRequestCameraPermission(boolean granted){
         camera_permission_granted = granted;
+    }
+
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
+        String imageFileName = "PHOTO_" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,      /* prefix */
+                ".jpg",      /* suffix */
+                storageDir         /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     @Override
