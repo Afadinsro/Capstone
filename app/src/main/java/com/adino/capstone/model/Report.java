@@ -5,13 +5,13 @@ package com.adino.capstone.model;
  */
 
 public class Report {
-    private DisasterCategory category;
-    private  String caption;
+    private String category;
+    private String caption;
     private String date;
     private String imageURL;
     private String location;
 
-    public Report(String caption, String date, DisasterCategory category, String imageURL, String location) {
+    public Report(String caption, String date, String category, String imageURL, String location) {
         this.date = date;
         this.category = category;
         this.caption = caption;
@@ -19,7 +19,7 @@ public class Report {
         this.location = location;
     }
     /****************************SETTER METHODS***********************************/
-    public void setCategory(DisasterCategory category) {
+    public void setCategory(String category) {
         this.category = category;
     }
 
@@ -40,7 +40,7 @@ public class Report {
     }
 
     /****************************GETTER METHODS***********************************/
-    public DisasterCategory getCategory() {
+    public String getCategory() {
         return category;
     }
 
