@@ -28,19 +28,24 @@
     <string name="tbtn_meteorological">Meteorological</string>
     <string name="tbtn_text_off"></string>
     <string name="tbtn_text_on"></string>
-    <string name="btn_submit_report">Submit</string>
 
     <!--CONTENT DESCRIPTIONS-->
     <string name="capture_content_description_img_view">Gallery</string>
 
     <!-- Text fields Texts -->
     <string name="txt_caption_placeholder">Write a caption&#8230;</string>
+    <string name="txt_location_placeholder">Location in words&#8230;</string>
+    <string name="txt_other_placeholder">Category&#8230;</string>
 
     <!-- Labels -->
     <string name="lbl_caption">Caption:</string>
     <string name="lbl_category">Category:</string>
     <string name="lbl_default">Label:</string>
     <string name="lbl_location">Location:</string>
+    <string name="lbl_radio_others">Other:</string>
+
+    <!-- BUTTON TEXTS -->
+    <string name="btn_submit">Submit</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_trending_fragment">Hello Trending fragment</string>

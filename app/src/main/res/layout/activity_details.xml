@@ -12,8 +12,162 @@
         android:id="@+id/tbtn_fire"
         android:layout_width="@dimen/tbtn_size"
         android:layout_height="@dimen/tbtn_size"
+        android:layout_toEndOf="@id/lbl_category"
+        android:layout_below="@+id/txt_report_caption"
         android:text="@string/tbtn_fire"
         android:textOff=""
-        android:textOn=""/>
+        android:textOn="" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_flood"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:layout_below="@+id/txt_report_caption"
+        android:layout_toEndOf="@id/tbtn_fire"
+        android:text="@string/tbtn_flood"
+        android:textOff=""
+        android:textOn="" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_motor"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:layout_below="@+id/txt_report_caption"
+        android:layout_toEndOf="@id/tbtn_flood"
+        android:text="@string/tbtn_motor"
+        android:textOff=""
+        android:textOn="" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_meteorological"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:layout_below="@+id/txt_report_caption"
+        android:layout_toEndOf="@id/tbtn_motor"
+        android:text="@string/tbtn_meteorological"
+        android:textOff=""
+        android:textOn="" />
+
+    <ToggleButton
+        android:id="@+id/tbtn_epidemic"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:layout_below="@+id/txt_report_caption"
+        android:layout_toEndOf="@id/tbtn_meteorological"
+        android:text="@string/tbtn_epidemic"
+        android:textOff=""
+        android:textOn="" />
+    <ToggleButton
+        android:id="@+id/tbtn_earthquake"
+        android:layout_width="@dimen/tbtn_size"
+        android:layout_height="@dimen/tbtn_size"
+        android:layout_below="@+id/txt_report_caption"
+        android:layout_toEndOf="@id/tbtn_epidemic"
+        android:text="@string/tbtn_earthquake"
+        android:textOff=""
+        android:textOn="" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="24dp"
+        android:layout_centerHorizontal="true"
+        android:clickable="true"
+        android:focusable="true"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:fabSize="normal"
+        app:srcCompat="@drawable/ic_send_black_24dp"
+        android:tint="@color/white"/>
+
+    <ImageView
+        android:id="@+id/img_report_pic"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:contentDescription="@string/capture_content_description_img_view"
+        app:srcCompat="@drawable/ic_image_black_200dp" />
+
+    <EditText
+        android:id="@+id/txt_report_caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/img_report_pic"
+        android:layout_toEndOf="@id/lbl_caption"
+        android:layout_alignStart="@id/tbtn_fire"
+        android:ems="13"
+        android:inputType="textPersonName"
+        android:text="@string/txt_caption_placeholder" />
+
+    <TextView
+        android:id="@+id/lbl_caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/txt_report_caption"
+        android:layout_alignBottom="@+id/txt_report_caption"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:labelFor="@id/txt_report_caption"
+        android:text="@string/lbl_caption" />
+
+    <TextView
+        android:id="@+id/lbl_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/tbtn_fire"
+        android:layout_alignBottom="@+id/tbtn_fire"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_below="@id/lbl_caption"
+        android:text="@string/lbl_category" />
+
+    <TextView
+        android:id="@+id/lbl_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/txt_report_location_words"
+        android:layout_alignBottom="@+id/txt_report_location_words"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="16dp"
+        android:layout_below="@id/lbl_category"
+        android:layout_toStartOf="@id/tbtn_fire"
+        android:text="@string/lbl_location"
+        android:labelFor="@id/txt_report_location_words"/>
+
+    <EditText
+        android:id="@+id/txt_report_location_words"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/radio_other"
+        android:layout_below="@+id/radio_other"
+        android:ems="13"
+        android:inputType="textPersonName"
+        android:text="@string/txt_location_placeholder" />
+
+    <RadioButton
+        android:id="@+id/radio_other"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/tbtn_fire"
+        android:layout_below="@+id/tbtn_fire"
+        android:layout_marginTop="14dp"
+        android:text="@string/lbl_radio_others"
+        android:enabled="false"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_other"
+        android:layout_below="@id/tbtn_fire"
+        android:layout_toEndOf="@id/radio_other"
+        android:layout_alignBaseline="@id/radio_other"
+        android:layout_alignBottom="@id/radio_other"
+        android:inputType="textPersonName"
+        android:ems="8"
+        android:text="@string/txt_other_placeholder"
+        android:enabled="false"/>
 
 </RelativeLayout>
