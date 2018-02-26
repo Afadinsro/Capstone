@@ -1,7 +1,5 @@
 package com.adino.capstone.model;
 
-import com.adino.capstone.capture.DisasterCategory;
-
 /**
  * Created by afadinsro on 12/6/17.
  */

@@ -28,6 +28,7 @@ import android.widget.ToggleButton;
 
 import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
+import com.adino.capstone.model.DisasterCategory;
 import com.adino.capstone.model.Report;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
