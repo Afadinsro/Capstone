@@ -66,7 +66,6 @@ dependencies {
         // Excludes the support library because it's already included by Glide.
         transitive = false
     }
-    compile 'org.jetbrains:annotations-java5:15.0'
 }
 /**
  * Google Play Services
