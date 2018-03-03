@@ -162,7 +162,9 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                                 Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
                                         "com.adino.capstone.fileprovider",
                                         photoFile);
+                                toImageCaptureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 toImageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                                //toImageCaptureIntent.putExtra("photoURI", photoURI);
                                 startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
                             }
                         }
@@ -242,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
         String imageFileName = "PHOTO_" + timeStamp;
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         File image = File.createTempFile(
                 imageFileName,      /* prefix */
                 ".jpg",      /* suffix */
@@ -268,6 +271,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         //super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_INTENT) {
             if (resultCode == RESULT_OK) {
+
+
                 // Get Image
                 Bundle extras = data.getExtras();
                 // Ensure an image is returned from the capture
@@ -278,6 +283,23 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
                 }
                 byte[] byteArray = byteArrayOutputStream.toByteArray(); // Get byte array
+
+                // Save File
+                Intent actionViewIntent = new Intent(Intent.ACTION_VIEW);
+                Uri photoURI = null;
+                try {
+                    photoURI = FileProvider.getUriForFile(MainActivity.this,
+                            "com.adino.capstone.fileprovider",
+                            createImageFile());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                addPicToGallery();
+                assert photoURI != null;
+                actionViewIntent.setDataAndType(photoURI,"image/jpeg");
+                startActivity(actionViewIntent);
+
                 // Navigate to DetailsActivity to add more details to the report
                 Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
                 goToAddDetailsIntent.putExtra("image", byteArray); // Add image byte array as extra to the intent
@@ -293,6 +315,14 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 navigation.setSelectedItemId(currentNavItem);
             }
         }
+    }
+
+    private void addPicToGallery() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File file = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
     }
 
     @Override

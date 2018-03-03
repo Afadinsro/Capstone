@@ -174,6 +174,14 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
 
+        setOnClickListenerFAB(inputMethodManager);
+    }
+
+    /**
+     * Sets the OnClickListener for the submit FAB
+     * @param inputMethodManager A final instance of an InputMethodManager
+     */
+    private void setOnClickListenerFAB(final InputMethodManager inputMethodManager)    {
         fabSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -256,11 +264,18 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         removeDatabaseReadListener();
     }
 
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
     }
 
+    /**
+     * Requests for the location permission if it hasn't been granted already
+     */
     private void getLocationPermission(){
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
@@ -280,6 +295,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
+    /**
+     * Called when a permission request is issued and completed
+     * @param requestCode Request code
+     * @param permissions Permissions
+     * @param grantResults Grant results
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
@@ -299,10 +320,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
-     * @param selectedTbtn
-     * @return
+     * Gets the category of the selected category, if the category is predefined
+     * User specified categories in the 'Other' section are retrieved differently
+     * @param selectedTbtn The selected toggle button
+     * @return A ReportCategory enum
      */
+    @org.jetbrains.annotations.Contract(pure = true)
     private DisasterCategory getSelectedCategory(ToggleButton selectedTbtn){
         DisasterCategory disasterCategory = null;
         if(selectedTbtn != null){
@@ -324,8 +347,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
-     * @return
+     *  Get the current date of the system
+     * @return A string representation of the date
      */
     private String getCurrentDate(){
         Calendar c = Calendar.getInstance();
@@ -334,15 +357,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
-     * @return
+     * Returns the caption of the report
+     * @return the report's caption
      */
+    @NonNull
     private String getCaption(){
         return txtCaption.getText().toString();
     }
 
     /**
-     *
+     * Get the current location of the user
      * @return
      */
     private String getLocation(){
@@ -350,7 +374,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
+     *  Attaches a read listener to the Firebase  database object
      */
     private void attachDatabaseReadListener(){
         if(childEventListener == null) {
@@ -385,7 +409,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
+     * Remove database read listeners
      */
     private void removeDatabaseReadListener(){
         if(childEventListener != null) {
@@ -394,13 +418,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         }
     }
 
+    /**
+     * Disables the 'Other' section when a toggle button is selected
+     */
     private void disableOtherSection(){
         txtOtherCategory.setEnabled(false);
         radioOther.setChecked(false);
     }
 
     /**
-     *
+     * Attaches a toggle state listener to all toggle buttons
      */
     private void attachToggleStateListeners() {
         tbtnFire.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -480,7 +507,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     /**
      * Toggle all other toggle buttons as unselected when one is selected
      * This method ensures that only one toggle button is selected
-     * @param selected
+     * @param selected Selected toggle button
      */
     private void toggleAllOthers(ToggleButton selected){
         Log.d(TAG, "toggleAllOthers: called");
@@ -495,14 +522,17 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
     }
 
+    /**
+     * Toggle all toggle buttons off when other radio button is selected
+     */
     private void radioOtherSelected(){
         toggleAllOthers(null);
     }
 
     /**
-     *
-     * @return
-     * @throws IOException
+     *  Creates an image in Pictures directory of app for saving the captured image
+     * @return A file for the image to be stored in
+     * @throws IOException Throws this exception if creation of the file fails
      */
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -521,12 +551,15 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
+     *  Uploads the captured image to Firebase storage using an upload task
+     *  On successful upload, a record of the report is uploaded to the database
+     *  with all report details including a link to the image in storage
      */
     private void uploadImage(){
         try {
             File imageFile = createImageFile();
             Uri file = Uri.fromFile(imageFile);
+            String photoFIle = getIntent().getStringExtra("photoUri");
             StorageReference photoRef = mPhotosStorageReference.child(file.getLastPathSegment());
 
             // Create file metadata including the content type
@@ -547,20 +580,22 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 assert downloadUrl != null;
                 imageURL = downloadUrl.toString();
 
-                category = getSelectedCategory(selectedTbtn).toString();
+                category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
+                        getSelectedCategory(selectedTbtn).toString();
                 date = getCurrentDate();
                 caption = getCaption();
                 Report report = new Report(caption, date, category, imageURL, location);
 
                 messagesDatabaseReference.push().setValue(report);
-                Intent home = new Intent(DetailsActivity.this, MainActivity.class);
-                startActivity(home);
-
+                Intent backToMainIntent = new Intent(DetailsActivity.this, MainActivity.class);
+                backToMainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(backToMainIntent);
+                finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Snackbar.make(fabSend, "Image uploaded failed", Snackbar.LENGTH_LONG)
+                Snackbar.make(fabSend, "Image uploaded failed!", Snackbar.LENGTH_LONG)
                         .setAction("Retry", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
