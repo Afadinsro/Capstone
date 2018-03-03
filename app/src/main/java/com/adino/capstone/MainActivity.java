@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.adino.capstone.capture.DetailsActivity;
+import com.adino.capstone.reports.ReportsFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
