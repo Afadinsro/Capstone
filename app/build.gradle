@@ -67,6 +67,7 @@ dependencies {
         transitive = false
     }
     compile 'org.jetbrains:annotations-java5:15.0'
+    compile 'org.jetbrains:annotations-java5:15.0'
 }
 /**
  * Google Play Services
