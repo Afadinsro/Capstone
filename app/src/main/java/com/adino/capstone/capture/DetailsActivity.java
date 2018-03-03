@@ -325,7 +325,6 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      * @param selectedTbtn The selected toggle button
      * @return A ReportCategory enum
      */
-    @org.jetbrains.annotations.Contract(pure = true)
     private DisasterCategory getSelectedCategory(ToggleButton selectedTbtn){
         DisasterCategory disasterCategory = null;
         if(selectedTbtn != null){
