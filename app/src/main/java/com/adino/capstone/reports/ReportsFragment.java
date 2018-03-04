@@ -4,11 +4,19 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
+import com.adino.capstone.model.Report;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 
 /**
@@ -28,6 +36,15 @@ public class ReportsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private RecyclerView rv_flames;
+
+    /**
+     * Firebase
+     */
+    private FirebaseRecyclerAdapter<Report, ReportViewHolder> adapter;
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
 
     private OnFragmentInteractionListener mListener;
 
@@ -60,6 +77,24 @@ public class ReportsFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        Query query = databaseReference.limitToFirst(3);
+        FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
+                .setQuery(query, Report.class)
+                .build();
+        //Use FirebaseRecyclerAdapter
+        adapter = new FirebaseRecyclerAdapter<Report, ReportViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(ReportViewHolder holder, int position, Report model) {
+                holder.bindViewHolder(model);
+            }
+
+            @Override
+            public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_report, parent, false);
+                return new ReportViewHolder(view, getContext());
+            }
+        };
     }
 
     @Override

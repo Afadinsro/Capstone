@@ -97,7 +97,8 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:contentDescription="@string/report_img_content_description"
-                app:srcCompat="@drawable/ic_flood"
+                app:srcCompat="@drawable/ic_image_black_24dp"
+                android:tint="@color/colorPrimaryDark"
                 android:layout_alignTop="@id/txt_report_category"/>
 
 
