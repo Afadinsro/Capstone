@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rel_report"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/item_report_height"
+    android:gravity="fill_horizontal"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cv_report"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:foreground="?selectableItemBackground">
+
+        <RelativeLayout
+            android:id="@+id/rl_cardview_report"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/rl_report_top_bottom_margins"
+            android:paddingEnd="@dimen/rl_report_side_margins"
+            android:paddingStart="@dimen/rl_report_side_margins"
+            android:paddingTop="@dimen/rl_report_top_bottom_margins">
+
+            <ImageView
+                android:id="@+id/img_report_pic"
+                android:layout_width="@dimen/img_report_pic_width"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/report_img_content_description"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_image_black_24dp"
+                android:layout_alignParentStart="true"
+                android:tint="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txt_report_date"
+                android:textSize="@dimen/txt_date_size"
+                android:text="@string/txt_date_placeholder"
+                android:layout_toEndOf="@id/img_report_pic"
+                android:layout_alignParentEnd="true"
+                android:textAlignment="textEnd"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/report_caption"
+                android:layout_below="@id/txt_report_date"
+                android:layout_toEndOf="@id/img_report_pic"
+                android:textSize="@dimen/txt_size"
+                android:text="@string/caption_placeholder"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="fill_horizontal"/>
+
+            <ImageView
+                android:id="@+id/img_report_category"
+                android:layout_width="@dimen/img_report_category_size"
+                android:layout_height="@dimen/img_report_category_size"
+                android:layout_alignParentBottom="true"
+                android:layout_toEndOf="@id/img_report_pic"
+                android:layout_alignStart="@+id/txt_report_location_words"
+                android:contentDescription="@string/report_img_content_description"
+                app:srcCompat="@drawable/ic_flood"
+                android:layout_alignTop="@id/txt_report_category"/>
+
+            <TextView
+                android:id="@+id/txt_report_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="16dp"
+                android:layout_toEndOf="@+id/img_report_category"
+                android:text="@string/category_placeholder"
+                android:textSize="12dp"
+                android:layout_toStartOf="@id/img_report_status"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txt_report_location_words"
+                android:layout_below="@id/report_caption"
+                android:text="Location"
+                android:textSize="12dp"
+                android:layout_toEndOf="@id/img_report_pic"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"/>
+
+            <ImageView
+                android:id="@+id/img_report_status"
+                android:layout_width="@dimen/img_report_category_size"
+                android:layout_height="@dimen/img_report_category_size"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="@string/report_img_content_description"
+                app:srcCompat="@drawable/ic_flood"
+                android:layout_alignTop="@id/txt_report_category"/>
+
+
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

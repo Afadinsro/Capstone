@@ -6,4 +6,10 @@
     <dimen name="tbtn_size">40dp</dimen>
     <dimen name="txt_size">16sp</dimen>
     <dimen name="img_report_pic">200dp</dimen>
+    <dimen name="item_report_height">150dp</dimen>
+    <dimen name="img_report_pic_width">118dp</dimen>
+    <dimen name="rl_report_top_bottom_margins">16dp</dimen>
+    <dimen name="rl_report_side_margins">16dp</dimen>
+    <dimen name="txt_date_size">12sp</dimen>
+    <dimen name="img_report_category_size">24dp</dimen>
 </resources>

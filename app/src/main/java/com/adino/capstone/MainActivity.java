@@ -122,12 +122,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }
         }
     };
+
     private String mCurrentPhotoPath;
 
-    private void toggleCaptureButtons(int visibility) {
-        fab_capture_picture.setVisibility(visibility);
-        fab_capture_video.setVisibility(visibility);
-    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -272,8 +270,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         //super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_INTENT) {
             if (resultCode == RESULT_OK) {
-
-
                 // Get Image
                 Bundle extras = data.getExtras();
                 // Ensure an image is returned from the capture
@@ -316,6 +312,15 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 navigation.setSelectedItemId(currentNavItem);
             }
         }
+    }
+
+    /**
+     * Toggles the visibility of the capture buttons
+     * @param visibility Visibility to set to
+     */
+    private void toggleCaptureButtons(int visibility) {
+        fab_capture_picture.setVisibility(visibility);
+        fab_capture_video.setVisibility(visibility);
     }
 
     private void addPicToGallery() {
