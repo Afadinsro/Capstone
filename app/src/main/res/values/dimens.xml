@@ -12,4 +12,5 @@
     <dimen name="rl_report_side_margins">16dp</dimen>
     <dimen name="txt_date_size">12sp</dimen>
     <dimen name="img_report_category_size">24dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
 </resources>
