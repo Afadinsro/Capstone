@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //firebaseDatabase.setPersistenceEnabled(true); // Enable offline storage
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true); // Enable offline storage
         // Check if Google Play Services is working properly
         if (!isGoogleServicesOK()) {
             Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();

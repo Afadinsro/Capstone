@@ -159,7 +159,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         txtCaption = (EditText)findViewById(R.id.txt_report_caption);
         txtCaption.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_CAPTION_LENGTH_LIMIT)});
 
-        txtLocation = (EditText)findViewById(R.id.item_report_location_words);
+        txtLocation = (EditText)findViewById(R.id.txt_report_location_words);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
@@ -168,7 +168,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
 
         // Display captured image
-        imgReportPic = (ImageView) findViewById(R.id.item_img_report_pic);
+        imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
         photo = getIntent().getByteArrayExtra("image");
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
