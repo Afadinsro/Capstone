@@ -15,9 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -26,7 +24,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.adino.capstone.MainActivity;
@@ -85,7 +82,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private StorageReference mPhotosStorageReference;
     private UploadTask uploadTask;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference messagesDatabaseReference;
+    private DatabaseReference reportsDatabaseReference;
 
     /**
      * Text Fields
@@ -130,6 +127,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         //InputMethodManager
         final InputMethodManager inputMethodManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
+        //firebaseDatabase.setPersistenceEnabled(true); // Enable offline storage
 
         //Initialize Toggle buttons
         tbtnEarthquake = (ToggleButton)findViewById(R.id.tbtn_earthquake);
@@ -161,15 +159,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         txtCaption = (EditText)findViewById(R.id.txt_report_caption);
         txtCaption.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_CAPTION_LENGTH_LIMIT)});
 
-        txtLocation = (EditText)findViewById(R.id.txt_report_location_words);
+        txtLocation = (EditText)findViewById(R.id.item_report_location_words);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
         firebaseDatabase = FirebaseDatabase.getInstance();
-        messagesDatabaseReference = firebaseDatabase.getReference().child("reports");
+
+        reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
 
         // Display captured image
-        imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
+        imgReportPic = (ImageView) findViewById(R.id.item_img_report_pic);
         photo = getIntent().getByteArrayExtra("image");
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
@@ -369,7 +368,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      * @return
      */
     private String getLocation(){
-        return "";
+        return txtLocation.getText().toString();
     }
 
     /**
@@ -403,7 +402,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 public void onCancelled(DatabaseError databaseError) {
                 }
             };
-            messagesDatabaseReference.addChildEventListener(childEventListener);
+            reportsDatabaseReference.addChildEventListener(childEventListener);
         }
     }
 
@@ -412,7 +411,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      */
     private void removeDatabaseReadListener(){
         if(childEventListener != null) {
-            messagesDatabaseReference.removeEventListener(childEventListener);
+            reportsDatabaseReference.removeEventListener(childEventListener);
             childEventListener = null;
         }
     }
@@ -583,12 +582,14 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                         getSelectedCategory(selectedTbtn).toString();
                 date = getCurrentDate();
                 caption = getCaption();
+                location = getLocation();
                 Report report = new Report(caption, date, category, imageURL, location);
 
-                messagesDatabaseReference.push().setValue(report);
-                Intent backToMainIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                backToMainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(backToMainIntent);
+                reportsDatabaseReference.push().setValue(report);
+                Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
+                backToReportsIntent.putExtra("detailsToReports", true);
+                backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(backToReportsIntent);
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {

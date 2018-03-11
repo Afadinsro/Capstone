@@ -28,6 +28,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private static final int REQUEST_CAMERA_PERMISSION = 200;
     private static final int REQUEST_IMAGE_INTENT = 500;
     private static final int REQUEST_VIDEO_INTENT = 200;
+
+    private FirebaseDatabase firebaseDatabase;
 
     private int currentNavItem;
 
@@ -131,21 +134,25 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //firebaseDatabase.setPersistenceEnabled(true); // Enable offline storage
         // Check if Google Play Services is working properly
-        if(!isGoogleServicesOK()){
+        if (!isGoogleServicesOK()) {
             Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();
             finish();
         }
         setRequestCameraPermission(checkCameraPermission());
 
-        fab_capture_picture = (FloatingActionButton)findViewById(R.id.fab_capture_picture);
+
+        Bundle extras = null;
+
+        fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
         fab_capture_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!camera_permission_granted) {
+                if (!camera_permission_granted) {
                     requestCameraStoragePermission();
                     // Camera permission granted
-                    if(camera_permission_granted) {
+                    if (camera_permission_granted) {
                         Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         // Ensure that there's a camera activity to handle the intent
                         if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
@@ -169,48 +176,67 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                         }
 
 
-
                     }
-                }else{
+                } else {
                     Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
                 }
             }
         });
-        fab_capture_video = (FloatingActionButton)findViewById(R.id.fab_capture_video);
+        fab_capture_video = (FloatingActionButton) findViewById(R.id.fab_capture_video);
         fab_capture_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!camera_permission_granted) {
+                if (!camera_permission_granted) {
                     requestCameraStoragePermission();
                     // Camera permission granted
-                    if(camera_permission_granted) {
-
-
+                    if (camera_permission_granted) {
                         Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                         startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
                     }
-                }else{
+                } else {
                     Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
                     startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
                 }
             }
         });
-        
+
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+
+
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
         // Initialize content view to Trending
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.content, new TrendingFragment()).commit();
 
+        // Navigate based on calling actib
+        Intent callingIntent = getIntent();
+        if (callingIntent == null) {
+            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+            fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+        } else {
+            boolean detailsToReports = false;
+            if (callingIntent.getExtras() != null){
+                detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+            }
+            //Extra check to make its from DetailsActivity
+            if (detailsToReports){
+                Log.d(TAG, "onCreate: From Details to Reports evaluated correctly");
+                navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
+                fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
+            }else{
+                navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+            }
+        }
         currentNavItem = navigation.getSelectedItemId();
+    }
 
-
-
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
     }
 
     /**
@@ -311,6 +337,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }else if(resultCode == RESULT_CANCELED){
                 navigation.setSelectedItemId(currentNavItem);
             }
+        }else if(requestCode == 1){
+
         }
     }
 

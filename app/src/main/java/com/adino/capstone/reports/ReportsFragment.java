@@ -4,7 +4,10 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +39,8 @@ public class ReportsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
-    private RecyclerView rv_flames;
+    private static final String TAG = "ReportsFragment";
+    private RecyclerView rv_reports;
 
     /**
      * Firebase
@@ -73,20 +76,42 @@ public class ReportsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //getActivity().setContentView(R.layout.fragment_reports);
+
+        Log.d(TAG, "onCreate: In onCreate");
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+    }
 
-        Query query = databaseReference.limitToFirst(3);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_reports, container, false);
+        rv_reports = (RecyclerView)view.findViewById(R.id.rv_report);
+        // Instantiate layout manager and add it to the RecyclerView
+        rv_reports.setLayoutManager(new LinearLayoutManager(getContext()));
+        /*
+         * Firebase
+         */
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference().child("reports");
+        databaseReference.keepSynced(true);
+        
+        Query query = databaseReference.limitToFirst(100);
         FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
                 .setQuery(query, Report.class)
                 .build();
+        Log.d(TAG, "onCreateView: before adapter is created");
         //Use FirebaseRecyclerAdapter
         adapter = new FirebaseRecyclerAdapter<Report, ReportViewHolder>(options) {
             @Override
             protected void onBindViewHolder(ReportViewHolder holder, int position, Report model) {
                 holder.bindViewHolder(model);
+                Log.d(TAG, "onBindViewHolder: Report: " + model.getCaption());
             }
 
             @Override
@@ -95,13 +120,23 @@ public class ReportsFragment extends Fragment {
                 return new ReportViewHolder(view, getContext());
             }
         };
+        rv_reports.setAdapter(adapter);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
+        rv_reports.addItemDecoration(dividerItemDecoration);
+
+        return view;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_reports, container, false);
+    public void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        adapter.stopListening();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

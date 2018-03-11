@@ -11,6 +11,10 @@ public class Report {
     private String imageURL;
     private String location;
 
+    public Report() {
+        // Default constructor required by Firebase
+    }
+
     public Report(String caption, String date, String category, String imageURL, String location) {
         this.date = date;
         this.category = category;
