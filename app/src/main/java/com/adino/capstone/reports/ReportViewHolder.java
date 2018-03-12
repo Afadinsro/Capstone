@@ -34,7 +34,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
     private static final String TAG = "ReportViewHolder";
 
 
-    public ReportViewHolder(View itemView, Context context) {
+    ReportViewHolder(View itemView, Context context) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
@@ -48,7 +48,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
         txtDate = (TextView)itemView.findViewById(R.id.item_report_date);
     }
 
-    public void bindViewHolder(Report model){
+    void bindViewHolder(Report model){
         txtCaption.setText(model.getCaption());
         txtCategory.setText(model.getCategory());
         txtLocation.setText(model.getLocation());
