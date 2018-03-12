@@ -33,6 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -141,46 +142,31 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();
             finish();
         }
+        //Initial check for whether camera permission has been granted or not
         setRequestCameraPermission(checkCameraPermission());
-
-
-        Bundle extras = null;
 
         fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
         fab_capture_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!camera_permission_granted) {
+                    // Request for permission to be granted
                     requestCameraStoragePermission();
                     // Camera permission granted
                     if (camera_permission_granted) {
                         Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         // Ensure that there's a camera activity to handle the intent
                         if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
-                            // Create the File where the photo should go
-                            File photoFile = null;
-                            try {
-                                photoFile = createImageFile();
-                            } catch (IOException ex) {
-                                // Error occurred while creating the File
-                            }
-                            // Continue only if the File was successfully created
-                            if (photoFile != null) {
-                                Uri photoURI = FileProvider.getUriForFile(MainActivity.this,
-                                        "com.adino.capstone.fileprovider",
-                                        photoFile);
-                                toImageCaptureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                toImageCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                                //toImageCaptureIntent.putExtra("photoURI", photoURI);
-                                startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
-                            }
+                            startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
                         }
-
-
                     }
                 } else {
+                    // Permission granted already
                     Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                    // Ensure that there's a camera activity to handle the intent
+                    if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                    }
                 }
             }
         });
@@ -201,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 }
             }
         });
+
         /*
         Bottom navigation initialization
         Default animation is disabled for a better one.
@@ -243,48 +230,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         super.onActivityReenter(resultCode, data);
     }
 
-    /**
-     *
-     * @return
-     */
-    private boolean checkCameraPermission() {
-        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestCameraStoragePermission(){
-        String[] permissions = {android.Manifest.permission.CAMERA,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_CAMERA_PERMISSION);
-    }
-
-    private void setRequestCameraPermission(boolean granted){
-        camera_permission_granted = granted;
-    }
-
-    /**
-     *
-     * @return
-     * @throws IOException
-     */
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
-        String imageFileName = "PHOTO_" + timeStamp;
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File image = File.createTempFile(
-                imageFileName,      /* prefix */
-                ".jpg",      /* suffix */
-                storageDir         /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
     @Override
     public void onFragmentInteraction(Uri uri) {
 
@@ -311,26 +256,18 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 }
                 byte[] byteArray = byteArrayOutputStream.toByteArray(); // Get byte array
 
-                // Save File
-                Intent actionViewIntent = new Intent(Intent.ACTION_VIEW);
-                Uri photoURI = null;
-                try {
-                    photoURI = FileProvider.getUriForFile(MainActivity.this,
-                            "com.adino.capstone.fileprovider",
-                            createImageFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                // Save image to File
+                File savedImageFile = saveImageToFile(byteArray);
+                // Image successfully saved?
+                if(savedImageFile != null) {
+                    addPicToGallery(savedImageFile);
+                    // Navigate to DetailsActivity to add more details to the report
+                    Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+                    goToAddDetailsIntent.putExtra("image", byteArray); // Add image byte array as extra to the intent
+                    startActivity(goToAddDetailsIntent);
+                }else{
+                    Toast.makeText(this, "Image could not be saved.", Toast.LENGTH_SHORT).show();
                 }
-
-                addPicToGallery();
-                assert photoURI != null;
-                actionViewIntent.setDataAndType(photoURI,"image/jpeg");
-                startActivity(actionViewIntent);
-
-                // Navigate to DetailsActivity to add more details to the report
-                Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-                goToAddDetailsIntent.putExtra("image", byteArray); // Add image byte array as extra to the intent
-                startActivity(goToAddDetailsIntent);
             }else if(resultCode == RESULT_CANCELED){
                 // If capture was cancelled, select the previously selected nav item.
                 navigation.setSelectedItemId(currentNavItem);
@@ -346,22 +283,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
     }
 
-    /**
-     * Toggles the visibility of the capture buttons
-     * @param visibility Visibility to set to
-     */
-    private void toggleCaptureButtons(int visibility) {
-        fab_capture_picture.setVisibility(visibility);
-        fab_capture_video.setVisibility(visibility);
-    }
-
-    private void addPicToGallery() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File file = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(file);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -373,17 +294,19 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     finish();
                 }else {
                     camera_permission_granted = true;
-
                 }
         }
     }
 
 
+    /**
+     * Check if Google Play services is available
+     * @return True if Google Play Services is available, false otherwise.
+     */
     private boolean isGoogleServicesOK(){
-        Log.d(TAG, "isGoogleServicesOK: checking Google Play Services version");
+        // Check if Google play services is okay
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
         if(available == ConnectionResult.SUCCESS){
-            Log.d(TAG, "isGoogleServicesOK: Google Play services is OK");
             //Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
             return true;
         }else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
@@ -394,8 +317,101 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         return false;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    /**
+     * Saves the given image byte array to file and returns the file
+     * @param bytes A byte array representation of the image to save
+     * @return The file which the image was saved into, null otherwise
+     */
+    private File saveImageToFile(byte[] bytes) {
+        FileOutputStream outputStream = null;
+        File file = null;
+        try {
+            file = createImageFile();
+            outputStream = new FileOutputStream(file);
+            outputStream.write(bytes);
+            Toast.makeText(this, "Image saved to: " + file, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream != null){
+                try{
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
+        return file;
+    }
+
+    /**
+     * Creates a file that captured image will be saved in
+     * @return Returns the created file
+     * @throws IOException Throws IO exception if file creation fails
+     */
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
+        String imageFileName = "PHOTO_" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File image = File.createTempFile(
+                imageFileName,      /* prefix */
+                ".jpg",      /* suffix */
+                storageDir         /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+
+    /**
+     * Adds thegiven image file to the gallery
+     * @param file Image file
+     */
+    private void addPicToGallery(File file) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
+    }
+
+    /**
+     * Toggles the visibility of the capture buttons
+     * @param visibility Visibility to set to
+     */
+    private void toggleCaptureButtons(int visibility) {
+        fab_capture_picture.setVisibility(visibility);
+        fab_capture_video.setVisibility(visibility);
+    }
+
+    /**
+     * Check if Camera permission has been granted
+     * @return True if camera permission has been granted and false if otherwise.
+     */
+    private boolean checkCameraPermission() {
+        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Requests for Camera and Storage permissions
+     */
+    private void requestCameraStoragePermission(){
+        String[] permissions = {android.Manifest.permission.CAMERA,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_CAMERA_PERMISSION);
+    }
+
+    /**
+     * Setter for camera_permission_granted
+     * @param granted Boolean value to set to
+     */
+    private void setRequestCameraPermission(boolean granted){
+        camera_permission_granted = granted;
     }
 }
