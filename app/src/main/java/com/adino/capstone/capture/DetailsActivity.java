@@ -30,6 +30,8 @@ import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.model.DisasterCategory;
 import com.adino.capstone.model.Report;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -83,6 +85,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private UploadTask uploadTask;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference reportsDatabaseReference;
+    FirebaseJobDispatcher jobDispatcher;
 
     /**
      * Text Fields
@@ -232,6 +235,10 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 }else {
                     // All fields validated
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
+                    // TODO upload image in background
+                    // Create a new dispatcher using the Google Play driver.
+                    jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+                    // TODO navigate to reports immediately with the image file and a pending status
                     uploadImage();
                 }
 
@@ -564,7 +571,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             StorageMetadata metadata = new StorageMetadata.Builder()
                     .setContentType("image/jpg")
                     .build();
-            uploadTask = photoRef.putFile(file);
+            //uploadTask = photoRef.putFile(file);
             uploadTask = photoRef.putBytes(photo, metadata);
 
         }catch (IOException e){

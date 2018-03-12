@@ -68,6 +68,13 @@
 
             </meta-data>
         </provider>
+        <service
+            android:exported="false"
+            android:name=".capture.UploadMediaService">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
