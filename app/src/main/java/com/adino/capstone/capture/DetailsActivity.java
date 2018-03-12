@@ -30,8 +30,13 @@ import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.model.DisasterCategory;
 import com.adino.capstone.model.Report;
+import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -52,6 +57,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
 
 public class DetailsActivity extends AppCompatActivity implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -238,12 +245,39 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                     // TODO upload image in background
                     // Create a new dispatcher using the Google Play driver.
                     jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+                    Job uploadJob = createUploadMediaJob(jobDispatcher);
+                    jobDispatcher.mustSchedule(uploadJob);
                     // TODO navigate to reports immediately with the image file and a pending status
                     uploadImage();
                 }
 
             }
         });
+    }
+
+    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher) {
+        Job job = dispatcher.newJobBuilder()
+                // the JobService that will be called
+                .setService(UploadMediaService.class)
+                // uniquely identifies the job
+                .setTag(UPLOAD_MEDIA_TAG)
+                // one-off job
+                .setRecurring(false)
+                // don't persist past a device reboot
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                // start between 0 and 60 seconds from now
+                .setTrigger(Trigger.executionWindow(0, 15))
+                // don't overwrite an existing job with the same tag
+                .setReplaceCurrent(false)
+                // retry with exponential backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                // constraints that need to be satisfied for the job to run
+                .setConstraints(
+                        // run on any network
+                        Constraint.ON_ANY_NETWORK
+                )
+                .build();
+        return job;
     }
 
     /**

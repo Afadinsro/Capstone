@@ -11,11 +11,11 @@ public class UploadMediaService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters job) {
-        return false;
+        return false; // Is there still more work to do?
     }
 
     @Override
     public boolean onStopJob(JobParameters job) {
-        return false;
+        return false; // Should the job be retried?
     }
 }

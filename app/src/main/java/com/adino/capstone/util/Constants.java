@@ -18,4 +18,9 @@ public final class Constants {
     public static final int REQUEST_CAMERA_PERMISSION = 200;
     public static final int REQUEST_IMAGE_INTENT = 500;
     public static final int REQUEST_VIDEO_INTENT = 200;
+
+    /*
+    TAGS
+     */
+    public static final String UPLOAD_MEDIA_TAG = "upload-report-media";
 }
