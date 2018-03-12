@@ -101,7 +101,7 @@ public class ReportsFragment extends Fragment {
         databaseReference = firebaseDatabase.getReference().child("reports");
         databaseReference.keepSynced(true);
         
-        Query query = databaseReference.limitToFirst(100);
+        Query query = databaseReference.limitToLast(100);
         FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
                 .setQuery(query, Report.class)
                 .build();

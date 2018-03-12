@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.adino.capstone.capture.DetailsActivity;
 import com.adino.capstone.reports.ReportsFragment;
+import com.adino.capstone.util.BottomNavigationViewHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,6 +38,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
+import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
+import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
+
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
         TrendingFragment.OnFragmentInteractionListener, OnMapReadyCallback{
@@ -44,11 +50,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private static final int REQUEST_IMAGE_CAPTURE = 222;
     private static final int CAMERA_REQUEST = 244;
     private static final String TAG = "MainActivity";
-    private static final int ERROR_DIALOG_REQUEST = 900;
-    private static final int REQUEST_CAMERA_PERMISSION = 200;
-    private static final int REQUEST_IMAGE_INTENT = 500;
-    private static final int REQUEST_VIDEO_INTENT = 200;
-
     private FirebaseDatabase firebaseDatabase;
 
     private int currentNavItem;
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true); // Enable offline storage
+
         // Check if Google Play Services is working properly
         if (!isGoogleServicesOK()) {
             Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();
@@ -200,38 +201,41 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 }
             }
         });
-
+        /*
+        Bottom navigation initialization
+        Default animation is disabled for a better one.
+        OnItemSelected and Reselected listeners attached.
+        The reselected listener helps to manage reselecting the capture item better.
+        After reselecting capture, go back to previously selected nav item
+         */
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
-
-
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
-        // Initialize content view to Trending
+        /*
+         Initialize content view to Trending
+         A fragment transaction helps to switch between fragments in the MainActivity.
+          */
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        // Navigate based on calling actib
+        // Navigate based on calling activity
         Intent callingIntent = getIntent();
-        if (callingIntent == null) {
+
+        boolean detailsToReports = false; // Navigating from details to reports?
+        if (callingIntent.getExtras() != null){
+            detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+        }
+        // Check to make sure its from DetailsActivity
+        if (detailsToReports){
+            navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
+            fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
+        }else{
+            Toast.makeText(this, "First time", Toast.LENGTH_SHORT).show();
             navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
             fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
-        } else {
-            boolean detailsToReports = false;
-            if (callingIntent.getExtras() != null){
-                detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
-            }
-            //Extra check to make its from DetailsActivity
-            if (detailsToReports){
-                Log.d(TAG, "onCreate: From Details to Reports evaluated correctly");
-                navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
-                fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
-            }else{
-                navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
-            }
         }
-        currentNavItem = navigation.getSelectedItemId();
+
+        currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
     }
 
     @Override
