@@ -17,9 +17,12 @@ import com.adino.capstone.R;
 import com.adino.capstone.model.Report;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 
 /**
@@ -111,7 +114,6 @@ public class ReportsFragment extends Fragment {
             @Override
             protected void onBindViewHolder(ReportViewHolder holder, int position, Report model) {
                 holder.bindViewHolder(model);
-                Log.d(TAG, "onBindViewHolder: Report: " + model.getCaption());
             }
 
             @Override

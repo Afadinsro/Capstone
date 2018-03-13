@@ -23,4 +23,12 @@ public final class Constants {
     TAGS
      */
     public static final String UPLOAD_MEDIA_TAG = "upload-report-media";
+
+    /*
+    Extra keys
+     */
+    public static final String IMAGE_FILE_ABS_PATH = "imageFileAbsPath";
+    public static final String IMAGE_BYTE_ARRAY = "imageByteArray";
+    public static final String PUSHED_REPORT_KEY = "pushedReportKey";
+    public static final String PATH_TO_IMAGE_FILE = "pathToImageFile";
 }

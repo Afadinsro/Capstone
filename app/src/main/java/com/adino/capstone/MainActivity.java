@@ -40,6 +40,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
+import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
@@ -209,18 +211,22 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         Intent callingIntent = getIntent();
 
         boolean detailsToReports = false; // Navigating from details to reports?
-        if (callingIntent.getExtras() != null){
+        if (callingIntent.getExtras() != null) {
             detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
-        }
-        // Check to make sure its from DetailsActivity
-        if (detailsToReports){
-            navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
-            fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
+            // Check to make sure its from DetailsActivity
+            if (detailsToReports) {
+                navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
+                fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
+            }else{
+                navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+            }
         }else{
-            Toast.makeText(this, "First time", Toast.LENGTH_SHORT).show();
+            // No extras in calling intent
             navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
             fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
         }
+
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
     }
@@ -263,7 +269,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     addPicToGallery(savedImageFile);
                     // Navigate to DetailsActivity to add more details to the report
                     Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-                    goToAddDetailsIntent.putExtra("image", byteArray); // Add image byte array as extra to the intent
+                    goToAddDetailsIntent.putExtra(IMAGE_BYTE_ARRAY, byteArray); // Add image byte array as extra to the intent
+                    goToAddDetailsIntent.putExtra(IMAGE_FILE_ABS_PATH, savedImageFile.getAbsolutePath()); // Add absolute path of file
                     startActivity(goToAddDetailsIntent);
                 }else{
                     Toast.makeText(this, "Image could not be saved.", Toast.LENGTH_SHORT).show();
@@ -329,7 +336,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             file = createImageFile();
             outputStream = new FileOutputStream(file);
             outputStream.write(bytes);
-            Toast.makeText(this, "Image saved to: " + file, Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

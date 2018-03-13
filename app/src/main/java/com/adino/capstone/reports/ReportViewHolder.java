@@ -62,10 +62,14 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
                 .into(imgReportPic);
 
         loadCategoryIcon(model.getCategory());
-        loadStatusIcon();
+        loadStatusIcon(model.getImageURL());
     }
 
-    private void loadStatusIcon() {
+    private void loadStatusIcon(String imageURL) {
+        // TODO implement logic to know whether report has been uploaded online
+        if(imageURL.startsWith("https")){
+
+        }
         GlideApp.with(getContext())
                 .load(R.drawable.ic_check_black_24dp)
                 .placeholder(R.drawable.ic_autorenew_black_24dp)

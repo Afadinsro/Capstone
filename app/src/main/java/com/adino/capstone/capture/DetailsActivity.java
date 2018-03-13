@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.adino.capstone.MainActivity;
@@ -58,6 +59,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
+import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PATH_TO_IMAGE_FILE;
+import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
 
 public class DetailsActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -124,7 +129,9 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
     private ImageView imgReportPic;
     private byte[] photo;
+    private File imageFile;
     private String mCurrentPhotoPath;
+    private String key;
 
 
     @Override
@@ -179,10 +186,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
         // Display captured image
         imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
-        photo = getIntent().getByteArrayExtra("image");
+        photo = getIntent().getByteArrayExtra(IMAGE_BYTE_ARRAY);
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
 
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
         setOnClickListenerFAB(inputMethodManager);
     }
 
@@ -242,39 +250,93 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 }else {
                     // All fields validated
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
+
+                    Intent callingIntent = getIntent();
+                    String path = "";
+                    if(callingIntent.getExtras() != null){
+                        path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
+                        imageFile = new File(path);
+                    }
+                    String pushKey = uploadReport();
+                    Toast.makeText(DetailsActivity.this, path, Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(DetailsActivity.this, "Report uploaded to: " + pushKey, Toast.LENGTH_SHORT).show();
                     // TODO upload image in background
                     // Create a new dispatcher using the Google Play driver.
-                    jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
-                    Job uploadJob = createUploadMediaJob(jobDispatcher);
+                    Bundle jobParameters = new Bundle();
+                    /*
+                    Add Job parameters
+                    1. PUSHED_REPORT_KEY - the key generated using the push() method. This will be
+                    used to update the imageURL of the report when image is successfully uploaded online
+                    2. IMAGE_FILE_ABS_PATH - Absolute path of the image stored on disk
+                     */
+                    jobParameters.putString(PUSHED_REPORT_KEY, pushKey);
+                    jobParameters.putString(IMAGE_FILE_ABS_PATH, path);
+                    Job uploadJob = createUploadMediaJob(jobDispatcher, jobParameters);
+
+
                     jobDispatcher.mustSchedule(uploadJob);
+                    //uploadImage();
+
+
+
                     // TODO navigate to reports immediately with the image file and a pending status
-                    uploadImage();
+                    Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
+                    backToReportsIntent.putExtra("detailsToReports", true);
+                    //backToReportsIntent.putExtra("reportKey", key);
+                    backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(backToReportsIntent);
                 }
 
             }
         });
     }
 
-    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher) {
+    private String uploadReport() {
+        // Initial image url is the location of the file on disk
+        // This will be changed when the
+        String imageURL = Uri.fromFile(imageFile).toString();
+
+        category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
+                getSelectedCategory(selectedTbtn).toString();
+        date = getCurrentDate();
+        caption = getCaption();
+        location = getLocation();
+        Report report = new Report(caption, date, category, imageURL, location);
+        String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
+        reportsDatabaseReference.child(pushKey).setValue(report);
+        Toast.makeText(this, "Report uploaded to: " + pushKey, Toast.LENGTH_SHORT).show();
+        return pushKey;
+    }
+
+    /**
+     *
+     * @param dispatcher
+     * @param jobParameters
+     * @return
+     */
+    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
         Job job = dispatcher.newJobBuilder()
                 // the JobService that will be called
                 .setService(UploadMediaService.class)
                 // uniquely identifies the job
                 .setTag(UPLOAD_MEDIA_TAG)
+                // add parameters
+                .setExtras(jobParameters)
                 // one-off job
                 .setRecurring(false)
                 // don't persist past a device reboot
                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
-                // start between 0 and 60 seconds from now
-                .setTrigger(Trigger.executionWindow(0, 15))
+                // start ASAP
+                .setTrigger(Trigger.NOW)
                 // don't overwrite an existing job with the same tag
                 .setReplaceCurrent(false)
-                // retry with exponential backoff
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                // retry with linear backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 // constraints that need to be satisfied for the job to run
                 .setConstraints(
-                        // run on any network
-                        Constraint.ON_ANY_NETWORK
+                    // run on any network
+                    Constraint.ON_ANY_NETWORK
                 )
                 .build();
         return job;
@@ -441,6 +503,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(DetailsActivity.this, "Error occurred! Report not sent!", Toast.LENGTH_SHORT).show();
                 }
             };
             reportsDatabaseReference.addChildEventListener(childEventListener);
@@ -627,6 +690,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 Report report = new Report(caption, date, category, imageURL, location);
 
                 reportsDatabaseReference.push().setValue(report);
+                // Get push key
+                String key = reportsDatabaseReference.getKey();
                 Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
                 backToReportsIntent.putExtra("detailsToReports", true);
                 backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
