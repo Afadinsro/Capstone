@@ -263,6 +263,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 byte[] byteArray = byteArrayOutputStream.toByteArray(); // Get byte array
 
                 // Save image to File
+                // TODO save image only after submit button is clicked in DetailsActivity
                 File savedImageFile = saveImageToFile(byteArray);
                 // Image successfully saved?
                 if(savedImageFile != null) {

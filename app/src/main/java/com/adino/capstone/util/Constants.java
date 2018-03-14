@@ -31,4 +31,15 @@ public final class Constants {
     public static final String IMAGE_BYTE_ARRAY = "imageByteArray";
     public static final String PUSHED_REPORT_KEY = "pushedReportKey";
     public static final String PATH_TO_IMAGE_FILE = "pathToImageFile";
+
+    /*
+    Database Fields
+     */
+    public static final String REPORT_FIELD_CAPTION = "caption";
+    public static final String REPORT_FIELD_CATEGORY = "category";
+    public static final String REPORT_FIELD_DATE = "date";
+    public static final String REPORT_FIELD_IMAGEURL = "imageURL";
+    public static final String REPORT_FIELD_LOCATION = "location";
+    public static final String REPORT_FIELD_VIDEOURL = "videoURL";
+
 }

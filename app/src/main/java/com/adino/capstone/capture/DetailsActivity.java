@@ -61,7 +61,6 @@ import java.util.Locale;
 
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
-import static com.adino.capstone.util.Constants.PATH_TO_IMAGE_FILE;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
 
@@ -249,18 +248,18 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                             }).show();
                 }else {
                     // All fields validated
+                    Log.d(TAG, "onClick: All fields validated");
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
 
                     Intent callingIntent = getIntent();
                     String path = "";
                     if(callingIntent.getExtras() != null){
                         path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
+                        assert path != null;
                         imageFile = new File(path);
                     }
                     String pushKey = uploadReport();
-                    Toast.makeText(DetailsActivity.this, path, Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(DetailsActivity.this, "Report uploaded to: " + pushKey, Toast.LENGTH_SHORT).show();
                     // TODO upload image in background
                     // Create a new dispatcher using the Google Play driver.
                     Bundle jobParameters = new Bundle();
@@ -276,14 +275,14 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
 
                     jobDispatcher.mustSchedule(uploadJob);
+                    Log.d(TAG, "onClick: Job scheduled");
+                    Toast.makeText(DetailsActivity.this, "Job Scheduled", Toast.LENGTH_SHORT).show();
                     //uploadImage();
-
-
 
                     // TODO navigate to reports immediately with the image file and a pending status
                     Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
                     backToReportsIntent.putExtra("detailsToReports", true);
-                    //backToReportsIntent.putExtra("reportKey", key);
+                    backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
@@ -292,6 +291,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         });
     }
 
+    /**
+     * Upload report to FirebaseDatabase with imageURL as filelocation on disk
+     * imageURL will be changed immediately file is successfully uploaded to storage in background
+     * @return key for the uploaded report
+     */
     private String uploadReport() {
         // Initial image url is the location of the file on disk
         // This will be changed when the
@@ -316,7 +320,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      * @return
      */
     private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
-        Job job = dispatcher.newJobBuilder()
+        Log.d(TAG, "createUploadMediaJob: Creating job...");
+        return dispatcher.newJobBuilder()
                 // the JobService that will be called
                 .setService(UploadMediaService.class)
                 // uniquely identifies the job
@@ -324,11 +329,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 // add parameters
                 .setExtras(jobParameters)
                 // one-off job
-                .setRecurring(false)
+                .setRecurring(true)
                 // don't persist past a device reboot
                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 // start ASAP
-                .setTrigger(Trigger.NOW)
+                .setTrigger(Trigger.executionWindow(1, 15))
                 // don't overwrite an existing job with the same tag
                 .setReplaceCurrent(false)
                 // retry with linear backoff
@@ -339,7 +344,6 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                     Constraint.ON_ANY_NETWORK
                 )
                 .build();
-        return job;
     }
 
     /**
