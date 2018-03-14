@@ -42,7 +42,7 @@ public class UploadMediaService extends JobService {
     private Activity activity;
     private boolean retry = true;
     private boolean moreWork = true;
-    private  static UploadImageTask imageTask;
+    //private  static UploadImageTask imageTask;
     private static final String TAG = "UploadMediaService";
     private StorageReference mPhotosStorageReference;
     private Thread uploadThread;
@@ -110,7 +110,7 @@ public class UploadMediaService extends JobService {
             uploadThread.interrupt();
             uploadThread = null;
         }
-        return retry; // Should the job be retried?
+        return false; // Should the job be retried?
     }
 
     /**
@@ -130,6 +130,7 @@ public class UploadMediaService extends JobService {
                     .setContentType("image/jpg")
                     .build();
             uploadTask = photoRef.putFile(fileUri, metadata);
+            Toast.makeText(getApplicationContext(), "Uploading image to Storage...", Toast.LENGTH_SHORT).show();
             //uploadTask = photoRef.putBytes(photo, metadata);
 
         }catch (Exception e){
@@ -167,69 +168,70 @@ public class UploadMediaService extends JobService {
 
 
 
-    static class UploadImageTask extends AsyncTask<String, Void, Boolean>{
+//    static class UploadImageTask extends AsyncTask<String, Void, Boolean>{
+//
+//        private boolean retry = true;
+//        private File mediaFile;
+//        private String key;
+//        private UploadTask uploadTask;
+//        private StorageReference mPhotosStorageReference = FirebaseStorage.getInstance().getReference().child("photos");
+//
+//        private static final String TAG = "UploadImageTask";
+//
+//        @Override
+//        protected Boolean doInBackground(String... params) {
+//            Log.d(TAG, "doInBackground: Background work started");
+//            String path = params[0];
+//            mediaFile = (path != null) ? new File(path) : null;
+//            key = params[1];
+//
+//            uploadImage();
+//
+//            return retry;
+//        }
+//
+//        /**
+//         *  Uploads the captured image to Firebase storage using an upload task
+//         *  On successful upload, a record of the report is uploaded to the database
+//         *  with all report details including a link to the image in storage
+//         */
+//        private void uploadImage(){
+//            Log.d(TAG, "uploadImage: Uploading image.");
+//            try {
+//                Uri fileUri = Uri.fromFile(mediaFile);
+//                // Assign key for file
+//                StorageReference photoRef = mPhotosStorageReference.child(fileUri.getLastPathSegment());
+//
+//                // Create file metadata including the content type
+//                StorageMetadata metadata = new StorageMetadata.Builder()
+//                        .setContentType("image/jpg")
+//                        .build();
+//                uploadTask = photoRef.putFile(fileUri, metadata);
+//                //uploadTask = photoRef.putBytes(photo, metadata);
+//
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//
+//            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                @Override
+//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+//                    assert downloadUrl != null;
+//                    // TODO upload reports to /reports/userid/ instead of /reports/
+//                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("reports");
+//                    // Update the image URL upon successful upload
+//                    reference.child(key).setValue(downloadUrl);
+//                    retry = false;
+//
+//                }
+//            }).addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    retry = true;
+//                }
+//            });
+//        }
+//    }
 
-        private boolean retry = true;
-        private File mediaFile;
-        private String key;
-        private UploadTask uploadTask;
-        private StorageReference mPhotosStorageReference = FirebaseStorage.getInstance().getReference().child("photos");
-
-        private static final String TAG = "UploadImageTask";
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            Log.d(TAG, "doInBackground: Background work started");
-            String path = params[0];
-            mediaFile = (path != null) ? new File(path) : null;
-            key = params[1];
-
-            uploadImage();
-
-            return retry;
-        }
-
-        /**
-         *  Uploads the captured image to Firebase storage using an upload task
-         *  On successful upload, a record of the report is uploaded to the database
-         *  with all report details including a link to the image in storage
-         */
-        private void uploadImage(){
-            Log.d(TAG, "uploadImage: Uploading image.");
-            try {
-                Uri fileUri = Uri.fromFile(mediaFile);
-                // Assign key for file
-                StorageReference photoRef = mPhotosStorageReference.child(fileUri.getLastPathSegment());
-
-                // Create file metadata including the content type
-                StorageMetadata metadata = new StorageMetadata.Builder()
-                        .setContentType("image/jpg")
-                        .build();
-                uploadTask = photoRef.putFile(fileUri, metadata);
-                //uploadTask = photoRef.putBytes(photo, metadata);
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    assert downloadUrl != null;
-                    // TODO upload reports to /reports/userid/ instead of /reports/
-                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("reports");
-                    // Update the image URL upon successful upload
-                    reference.child(key).setValue(downloadUrl);
-                    retry = false;
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    retry = true;
-                }
-            });
-        }
-    }
 }

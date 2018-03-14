@@ -329,11 +329,11 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 // add parameters
                 .setExtras(jobParameters)
                 // one-off job
-                .setRecurring(true)
+                .setRecurring(false)
                 // don't persist past a device reboot
-                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                .setLifetime(Lifetime.FOREVER)
                 // start ASAP
-                .setTrigger(Trigger.executionWindow(1, 15))
+                .setTrigger(Trigger.executionWindow(0,0))
                 // don't overwrite an existing job with the same tag
                 .setReplaceCurrent(false)
                 // retry with linear backoff
