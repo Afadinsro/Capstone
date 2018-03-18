@@ -65,17 +65,32 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
         loadStatusIcon(model.getImageURL());
     }
 
+    /**
+     * Loads a drawable that represents the status of the report sent.
+     * Statuses include
+     * 1. Pending
+     * 2. Sent
+     * 3. Not sent (Handled in the Reports fragment)
+     * @param imageURL Image URL
+     */
     private void loadStatusIcon(String imageURL) {
-        // TODO implement logic to know whether report has been uploaded online
+        // Default status - waiting
+        int drawable = R.drawable.ic_watch_later_black_24dp;
+        imgReportStatus.setColorFilter(R.color.yellow);
+        // Report loaded online when URL starts with 'https'
         if(imageURL.startsWith("https")){
-
+            // Report loaded successfully
+            drawable = R.drawable.ic_check_circle_black_24dp;
+            imgReportStatus.setColorFilter(R.color.green);
         }
+        // Load drawable with Glide
         GlideApp.with(getContext())
-                .load(R.drawable.ic_check_black_24dp)
-                .placeholder(R.drawable.ic_autorenew_black_24dp)
-                .error(R.drawable.ic_broken_image_black_24dp)
-                .fallback(R.drawable.ic_image_black_24dp)
+                .load(drawable)
+                .placeholder(R.drawable.ic_sync_black_24dp)
+                .error(R.drawable.ic_sync_problem_black_24dp)
+                .fallback(R.drawable.ic_sync_black_24dp)
                 .into(imgReportStatus);
+
     }
 
     @Override

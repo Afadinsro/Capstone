@@ -11,18 +11,29 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.model.Report;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.util.List;
+
+import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
+import static com.adino.capstone.util.Constants.REPORT_FIELD_IMAGEURL;
 
 
 /**
@@ -40,8 +51,8 @@ public class ReportsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String key;
+    private String path;
     private static final String TAG = "ReportsFragment";
     private RecyclerView rv_reports;
 
@@ -58,20 +69,21 @@ public class ReportsFragment extends Fragment {
         // Required empty public constructor
     }
 
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param key Parameter 1.
+     * @param path Parameter 2.
      * @return A new instance of fragment ReportsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ReportsFragment newInstance(String param1, String param2) {
+    public static ReportsFragment newInstance(String key, String path) {
         ReportsFragment fragment = new ReportsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(PUSHED_REPORT_KEY, key);
+        args.putString(IMAGE_FILE_ABS_PATH, path);
         fragment.setArguments(args);
         return fragment;
     }
@@ -79,13 +91,11 @@ public class ReportsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //getActivity().setContentView(R.layout.fragment_reports);
 
         Log.d(TAG, "onCreate: In onCreate");
-
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            key = getArguments().getString(PUSHED_REPORT_KEY);
+            path = getArguments().getString(IMAGE_FILE_ABS_PATH);
         }
     }
 
@@ -139,6 +149,37 @@ public class ReportsFragment extends Fragment {
     public void onStop() {
         super.onStop();
         adapter.stopListening();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume: called");
+        // Check if image upload has been successful
+        StorageReference reference = FirebaseStorage.getInstance().getReference("reports");
+        List<UploadTask> activeUploadTasks = reference.getActiveUploadTasks();
+        for(UploadTask uploadTask: activeUploadTasks){
+            // Expecting only one upload task to be active
+            if(activeUploadTasks.size() == 1) {
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Log.d(TAG, "onSuccess: Upload successful");
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                        assert downloadUrl != null;
+
+                        // TODO upload reports to /reports/userid/ instead of /reports/
+                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("reports");
+                        databaseReference.child(key).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(getActivity(), "ImageURL updated", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

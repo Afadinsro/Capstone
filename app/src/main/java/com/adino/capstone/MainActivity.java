@@ -29,19 +29,26 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
@@ -54,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private static final int CAMERA_REQUEST = 244;
     private static final String TAG = "MainActivity";
     private FirebaseDatabase firebaseDatabase;
+    private FirebaseDatabase storage;
 
     private int currentNavItem;
 
@@ -213,10 +221,12 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         boolean detailsToReports = false; // Navigating from details to reports?
         if (callingIntent.getExtras() != null) {
             detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+            String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
+            String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
             // Check to make sure its from DetailsActivity
             if (detailsToReports) {
                 navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
-                fragmentTransaction.replace(currentNavItem, new ReportsFragment()).commitAllowingStateLoss();
+                fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey, path)).commitAllowingStateLoss();
             }else{
                 navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
                 fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();

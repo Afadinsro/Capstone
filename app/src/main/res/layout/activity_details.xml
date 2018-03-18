@@ -116,6 +116,7 @@
         android:layout_toEndOf="@id/lbl_caption"
         android:ellipsize="start"
         android:ems="15"
+        android:layout_marginEnd="8dp"
         android:hint="@string/txt_caption_placeholder"
         android:inputType="textPersonName"
         android:textColorLink="@color/colorPrimary"
@@ -167,6 +168,7 @@
         android:layout_alignStart="@id/radio_other"
         android:layout_below="@+id/radio_other"
         android:ems="15"
+        android:layout_marginEnd="8dp"
         android:textSize="@dimen/txt_size"
         android:inputType="textPersonName"
         android:hint="@string/txt_location_placeholder" />

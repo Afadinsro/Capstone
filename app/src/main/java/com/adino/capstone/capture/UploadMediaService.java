@@ -1,6 +1,5 @@
 package com.adino.capstone.capture;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
@@ -45,6 +44,7 @@ public class UploadMediaService extends JobService {
     //private  static UploadImageTask imageTask;
     private static final String TAG = "UploadMediaService";
     private StorageReference mPhotosStorageReference;
+    private DatabaseReference reference;
     private Thread uploadThread;
 
 
@@ -52,6 +52,7 @@ public class UploadMediaService extends JobService {
     @Override
     public boolean onStartJob(final JobParameters job) {
         Log.d(TAG, "onStartJob: Job started");
+        Toast.makeText(getApplicationContext(), "In background service.", Toast.LENGTH_SHORT).show();
         uploadThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -66,15 +67,39 @@ public class UploadMediaService extends JobService {
                     Log.d(TAG, "onStartJob: Media file path: " + mediaFile);
                 }
                 uploadImage();
-                jobFinished(job, false);
+
             }
         });
         uploadThread.start();
-        
 
-        
-        
-        Toast.makeText(getApplicationContext(), "In background service.", Toast.LENGTH_SHORT).show();
+        try {
+            uploadThread.join();
+            Log.d(TAG, "onStartJob: join() called");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d(TAG, "onSuccess: Upload successful");
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                assert downloadUrl != null;
+                Log.d(TAG, "onSuccess: download URL obtained");
+                // TODO upload reports to /reports/userid/ instead of /reports/
+                reference = FirebaseDatabase.getInstance().getReference().child("reports");
+                Log.d(TAG, "onSuccess: Get database reference");
+                // Update the image URL upon successful upload
+                Log.d(TAG, "onSuccess: key is " + key);
+                Log.d(TAG, "onSuccess: report field is " + REPORT_FIELD_IMAGEURL);
+                reference.child(key).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl);
+                Log.d(TAG, "onSuccess: Update imageURL");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                retry = true;
+            }
+        });
 
 //        if(job.getExtras() != null){
 //            key = job.getExtras().getString(PUSHED_REPORT_KEY);
@@ -98,7 +123,10 @@ public class UploadMediaService extends JobService {
 //            }
 //        };
 //        imageTask.execute(path, key);
-        Log.d(TAG, "onStartJob: Execution in progress...");
+
+        // Call jobFinished to free resources
+        Log.d(TAG, "run: Calling jobFinished...");
+        jobFinished(job, false);
 
         return false; // Is there still more work to do?
     }
@@ -130,31 +158,12 @@ public class UploadMediaService extends JobService {
                     .setContentType("image/jpg")
                     .build();
             uploadTask = photoRef.putFile(fileUri, metadata);
-            Toast.makeText(getApplicationContext(), "Uploading image to Storage...", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "uploadImage: putFile called");
             //uploadTask = photoRef.putBytes(photo, metadata);
 
         }catch (Exception e){
             e.printStackTrace();
         }
-
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                assert downloadUrl != null;
-                // TODO upload reports to /reports/userid/ instead of /reports/
-                DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("reports");
-                // Update the image URL upon successful upload
-                reference.child(key).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl);
-                retry = false;
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                retry = true;
-            }
-        });
     }
 
     private void loadStatusIcon(int drawable) {

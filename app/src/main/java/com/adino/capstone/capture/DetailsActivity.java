@@ -276,13 +276,13 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
                     jobDispatcher.mustSchedule(uploadJob);
                     Log.d(TAG, "onClick: Job scheduled");
-                    Toast.makeText(DetailsActivity.this, "Job Scheduled", Toast.LENGTH_SHORT).show();
                     //uploadImage();
 
                     // TODO navigate to reports immediately with the image file and a pending status
                     Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
                     backToReportsIntent.putExtra("detailsToReports", true);
                     backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
+                    backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, path);
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
@@ -309,7 +309,6 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         Report report = new Report(caption, date, category, imageURL, location);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
         reportsDatabaseReference.child(pushKey).setValue(report);
-        Toast.makeText(this, "Report uploaded to: " + pushKey, Toast.LENGTH_SHORT).show();
         return pushKey;
     }
 
@@ -331,7 +330,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                 // one-off job
                 .setRecurring(false)
                 // don't persist past a device reboot
-                .setLifetime(Lifetime.FOREVER)
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 // start ASAP
                 .setTrigger(Trigger.executionWindow(0,0))
                 // don't overwrite an existing job with the same tag
