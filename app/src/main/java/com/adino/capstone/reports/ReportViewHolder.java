@@ -1,6 +1,8 @@
 package com.adino.capstone.reports;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,10 +20,6 @@ import com.adino.capstone.model.Report;
 
 public class ReportViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    /**
-     * For Reports (MainActivity)
-     */
-    private CardView cvReport;
     private ImageView imgReportPic;
     private ImageView imgReportCategory;
     private ImageView imgReportStatus;
@@ -38,7 +36,10 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
-        cvReport = (CardView)itemView.findViewById(R.id.item_cv_report);
+        /*
+        For Reports (MainActivity)
+        */
+        CardView cvReport = (CardView) itemView.findViewById(R.id.item_cv_report);
         imgReportCategory = (ImageView)itemView.findViewById(R.id.item_img_report_category);
         imgReportPic = (ImageView)itemView.findViewById(R.id.img_report_pic);
         imgReportStatus = (ImageView)itemView.findViewById(R.id.item_img_report_status);
@@ -48,6 +49,10 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
         txtDate = (TextView)itemView.findViewById(R.id.item_report_date);
     }
 
+    /**
+     *
+     * @param model Report
+     */
     void bindViewHolder(Report model){
         txtCaption.setText(model.getCaption());
         txtCategory.setText(model.getCategory());
@@ -76,12 +81,12 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
     private void loadStatusIcon(String imageURL) {
         // Default status - waiting
         int drawable = R.drawable.ic_watch_later_black_24dp;
-        imgReportStatus.setColorFilter(R.color.yellow);
+        imgReportStatus.setColorFilter(ContextCompat.getColor(getContext(), R.color.yellow), PorterDuff.Mode.SRC_IN);
         // Report loaded online when URL starts with 'https'
         if(imageURL.startsWith("https")){
             // Report loaded successfully
             drawable = R.drawable.ic_check_circle_black_24dp;
-            imgReportStatus.setColorFilter(R.color.green);
+            imgReportStatus.setColorFilter(ContextCompat.getColor(getContext(), R.color.green), PorterDuff.Mode.SRC_IN);
         }
         // Load drawable with Glide
         GlideApp.with(getContext())
@@ -106,6 +111,10 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
         return context;
     }
 
+    /**
+     * Loads the icon corresponding to the category of the report
+     * @param category Report Category
+     */
     private void loadCategoryIcon(String category){
         int drawable = -1;
         switch (category){

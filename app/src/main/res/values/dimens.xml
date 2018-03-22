@@ -11,6 +11,7 @@
     <dimen name="rl_report_top_bottom_margins">16dp</dimen>
     <dimen name="rl_report_side_margins">16dp</dimen>
     <dimen name="txt_date_size">12sp</dimen>
-    <dimen name="img_report_icon_size">32dp</dimen>
+    <dimen name="img_report_icon_size">24dp</dimen>
     <dimen name="bottom_nav_height">56dp</dimen>
+    <dimen name="img_status_icon_size">24dp</dimen>
 </resources>

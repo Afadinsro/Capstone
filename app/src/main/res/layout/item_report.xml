@@ -69,7 +69,8 @@
             <TextView
                 android:id="@+id/item_report_category"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/img_status_icon_size"
+                android:gravity="center_vertical"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@+id/item_img_report_category"
@@ -91,8 +92,8 @@
 
             <ImageView
                 android:id="@+id/item_img_report_status"
-                android:layout_width="@dimen/img_report_icon_size"
-                android:layout_height="@dimen/img_report_icon_size"
+                android:layout_width="@dimen/img_status_icon_size"
+                android:layout_height="@dimen/img_status_icon_size"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignTop="@id/item_report_category"
