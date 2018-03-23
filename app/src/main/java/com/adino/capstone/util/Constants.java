@@ -42,4 +42,14 @@ public final class Constants {
     public static final String REPORT_FIELD_LOCATION = "location";
     public static final String REPORT_FIELD_VIDEOURL = "videoURL";
 
+    /*
+    Databse References
+     */
+    public static final String REPORTS = "reports";
+    public static final String TRENDING = "trending";
+
+    /*
+    Grid Layout
+     */
+    public static final int GRID_COLUMN_COUNT = 2;
 }

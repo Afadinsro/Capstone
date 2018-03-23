@@ -33,6 +33,7 @@ import java.util.List;
 
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
+import static com.adino.capstone.util.Constants.REPORTS;
 import static com.adino.capstone.util.Constants.REPORT_FIELD_IMAGEURL;
 
 
@@ -60,7 +61,6 @@ public class ReportsFragment extends Fragment {
      * Firebase
      */
     private FirebaseRecyclerAdapter<Report, ReportViewHolder> adapter;
-    private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
 
     private OnFragmentInteractionListener mListener;
@@ -110,8 +110,7 @@ public class ReportsFragment extends Fragment {
         /*
          * Firebase
          */
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference().child("reports");
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(REPORTS);
         databaseReference.keepSynced(true);
         
         Query query = databaseReference.limitToLast(100);
@@ -129,7 +128,7 @@ public class ReportsFragment extends Fragment {
             @Override
             public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_report, parent, false);
-                return new ReportViewHolder(view, getContext());
+                return new ReportViewHolder(getContext(), view);
             }
         };
         rv_reports.setAdapter(adapter);

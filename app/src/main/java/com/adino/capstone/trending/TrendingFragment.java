@@ -4,11 +4,24 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.adino.capstone.R;
+import com.adino.capstone.model.Trending;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+
+import static com.adino.capstone.util.Constants.GRID_COLUMN_COUNT;
+import static com.adino.capstone.util.Constants.TRENDING;
 
 
 /**
@@ -24,6 +37,14 @@ public class TrendingFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "TrendingFragment";
+
+    private RecyclerView rvTrending;
+    /**
+     * Firebase
+     */
+    private FirebaseRecyclerAdapter<Trending, TrendingViewHolder> adapter;
+    private DatabaseReference databaseReference;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -65,10 +86,53 @@ public class TrendingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: View about to be created");
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_trending, container, false);
+        rvTrending = (RecyclerView)view.findViewById(R.id.rv_trending);
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(GRID_COLUMN_COUNT, LinearLayoutManager.VERTICAL);
+        rvTrending.setLayoutManager(layoutManager);
+        /*
+         * Firebase
+         */
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(TRENDING);
+        databaseReference.keepSynced(true);
+
+        Query query = databaseReference.limitToFirst(10);
+        FirebaseRecyclerOptions<Trending> options = new FirebaseRecyclerOptions.Builder<Trending>()
+                .setQuery(query, Trending.class)
+                .build();
+        adapter = new FirebaseRecyclerAdapter<Trending, TrendingViewHolder>(options) {
+            @Override
+            protected void onBindViewHolder(TrendingViewHolder holder, int position, Trending model) {
+                Log.d(TAG, "onBindViewHolder: Model: " + model.getTitle());
+                holder.bindViewHolder(model);
+            }
+
+            @Override
+            public TrendingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                Log.d(TAG, "onCreateViewHolder: ViewHolder created");
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending, parent, false);
+                return new TrendingViewHolder(getContext(), view);
+            }
+        };
+        Log.d(TAG, "onCreateView: Adapter created");
+        rvTrending.setAdapter(adapter);
+
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        adapter.stopListening();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

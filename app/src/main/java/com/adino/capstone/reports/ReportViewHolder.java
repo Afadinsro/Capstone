@@ -32,7 +32,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder implements View.On
     private static final String TAG = "ReportViewHolder";
 
 
-    ReportViewHolder(View itemView, Context context) {
+    ReportViewHolder(Context context, View itemView) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);

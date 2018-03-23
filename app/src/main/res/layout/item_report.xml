@@ -2,7 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rel_report"
+    android:id="@+id/ll_report"
     android:layout_width="match_parent"
     android:layout_height="@dimen/item_report_height"
     android:gravity="fill_horizontal"

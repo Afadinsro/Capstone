@@ -6,7 +6,7 @@ package com.adino.capstone.model;
 
 public class Trending {
     private String title;
-    private String description;
+    private String details;
     private String imageURL;
     private boolean status;
 
@@ -17,9 +17,9 @@ public class Trending {
     public Trending() {
     }
 
-    public Trending(String title, String description, String imageURL, boolean status) {
+    public Trending(String title, String details, String imageURL, boolean status) {
         setTitle(title);
-        setDescription(description);
+        setDetails(details);
         setImageURL(imageURL);
         setStatus(status);
     }
@@ -32,12 +32,12 @@ public class Trending {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
+    public String getDetails() {
+        return details;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     public String getImageURL() {
