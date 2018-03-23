@@ -1,6 +1,8 @@
 package com.adino.capstone.trending;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,14 +20,16 @@ import com.adino.capstone.model.Trending;
  */
 
 public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private static final String DIALOG_TAG = "Trending Dialog";
     private Context context;
     private ImageView imgTrendingPic;
     private TextView txtTitle;
     private TextView txtDescription;
+    private FragmentManager fragmentManager;
 
     private static final String TAG = "TrendingViewHolder";
 
-     TrendingViewHolder(Context context, View itemView) {
+     TrendingViewHolder(Context context, View itemView, FragmentManager fragmentManager) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
@@ -33,6 +37,7 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
         txtDescription = (TextView)itemView.findViewById(R.id.txt_trending_details);
         txtTitle = (TextView)itemView.findViewById(R.id.txt_trending_title);
         imgTrendingPic = (ImageView)itemView.findViewById(R.id.item_img_trending_pic);
+        this.fragmentManager = fragmentManager;
     }
 
     void bindViewHolder(Trending model){
@@ -57,6 +62,7 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
 
     @Override
     public void onClick(View v) {
-        Toast.makeText(context, "Item " + getAdapterPosition(), Toast.LENGTH_SHORT).show();
+
+        TrendingDialogFragment.newInstance("Title", "Details", "url").show(fragmentManager, DIALOG_TAG);
     }
 }

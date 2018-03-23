@@ -113,7 +113,7 @@ public class TrendingFragment extends Fragment {
             public TrendingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 Log.d(TAG, "onCreateViewHolder: ViewHolder created");
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending, parent, false);
-                return new TrendingViewHolder(getContext(), view);
+                return new TrendingViewHolder(getContext(), view, getFragmentManager());
             }
         };
         Log.d(TAG, "onCreateView: Adapter created");

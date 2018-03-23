@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/material_400"
+    android:scrollbarSize="@dimen/material_4"
+    android:scrollbars="vertical"
+    android:padding="@dimen/material_16">
+
+    <ImageView
+        android:id="@+id/dialog_img_trending_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_image_black_200dp"
+        android:contentDescription="@string/default_content_description"
+        android:layout_centerHorizontal="true"/>
+
+    <TextView
+        android:id="@+id/txt_dialog_trending_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_img_trending_pic"
+        android:gravity="fill_horizontal"
+        android:text="@string/default_text"
+        android:textSize="@dimen/txt_size_24"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="@dimen/material_8"
+        android:layout_marginTop="@dimen/material_4"/>
+
+    <TextView
+        android:id="@+id/txt_dialog_trending_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_dialog_trending_title"
+        android:gravity="fill_horizontal"
+        android:text="@string/default_text"
+        android:textSize="@dimen/txt_size_16" />
+
+    <TextView
+        android:id="@+id/txt_dialog_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>
