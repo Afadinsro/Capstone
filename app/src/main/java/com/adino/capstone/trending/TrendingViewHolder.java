@@ -103,6 +103,7 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
     @Override
     public void onClick(View v) {
         Log.d(TAG, "onClick: Item " + getAdapterPosition());
+        Log.d(TAG, "onClick: Size " + models.size());
         Trending model = this.models.get(getAdapterPosition());
         TrendingDialogFragment.newInstance(model.getTitle(), model.getDetails(), model.getImageURL())
                 .show(fragmentManager, DIALOG_TAG);
