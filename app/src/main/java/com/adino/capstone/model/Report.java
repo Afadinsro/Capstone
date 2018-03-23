@@ -1,5 +1,8 @@
 package com.adino.capstone.model;
 
+import java.lang.reflect.Constructor;
+import java.net.URL;
+
 /**
  * Created by afadinsro on 12/6/17.
  */
@@ -10,6 +13,8 @@ public class Report {
     private String date;
     private String imageURL;
     private String location;
+    private double longitude;
+    private double latitude;
 
     /**
      * Default constructor required by Firebase
@@ -30,6 +35,26 @@ public class Report {
         setDate(date);
         setImageURL(imageURL);
         setLocation(location);
+    }
+
+    /**
+     * Constructor
+     * @param caption caption
+     * @param date date
+     * @param category category
+     * @param imageURL image URL
+     * @param location location
+     * @param longitude longitude
+     * @param latitude latitude
+     */
+    public Report(String caption, String date, String category, String imageURL, String location, double longitude, double latitude) {
+        setCaption(caption);
+        setCategory(category);
+        setDate(date);
+        setImageURL(imageURL);
+        setLocation(location);
+        setLatitude(latitude);
+        setLongitude(longitude);
     }
     /****************************SETTER METHODS***********************************/
     /**
@@ -111,5 +136,21 @@ public class Report {
      */
     public String getLocation() {
         return location;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

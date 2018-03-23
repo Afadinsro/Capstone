@@ -1,4 +1,4 @@
-package com.adino.capstone;
+package com.adino.capstone.map;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -10,6 +10,8 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.adino.capstone.R;
 
 
 /**
