@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/bottom_nav_height"
+        android:orientation="vertical"
         tools:listitem="@layout/item_report"
         android:scrollbars="vertical"/>
 </FrameLayout>

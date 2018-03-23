@@ -21,8 +21,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.adino.capstone.capture.DetailsActivity;
+import com.adino.capstone.contacts.ContactsFragment;
 import com.adino.capstone.map.MapFragment;
 import com.adino.capstone.reports.ReportsFragment;
+import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;

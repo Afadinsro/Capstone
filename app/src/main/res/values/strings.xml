@@ -48,6 +48,9 @@
     <!-- BUTTON TEXTS -->
     <string name="btn_submit">Submit</string>
 
+    <!-- CONTENT DESCRIPTIONS -->
+    <string name="default_content_description">Content description</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_trending_fragment">Hello Trending fragment</string>
     <string name="hello_contacts_fragment">Hello Contacts fragment</string>
@@ -59,4 +62,5 @@
     <string name="report_img_content_description">Reports image content description</string>
     <string name="caption_placeholder">Caption</string>
     <string name="category_placeholder">Category</string>
+    <string name="default_text">Text</string>
 </resources>
