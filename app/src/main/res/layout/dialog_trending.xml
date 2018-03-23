@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    android:id="@+id/rl_dialog_trending"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="wrap_content"
@@ -10,11 +12,13 @@
 
     <ImageView
         android:id="@+id/dialog_img_trending_pic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/material_200"
+        android:layout_height="@dimen/material_200"
         app:srcCompat="@drawable/ic_image_black_200dp"
         android:contentDescription="@string/default_content_description"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/material_16"
+        android:scaleType="center"/>
 
     <TextView
         android:id="@+id/txt_dialog_trending_title"
@@ -39,16 +43,15 @@
         android:textSize="@dimen/txt_size_16" />
 
     <TextView
-        android:id="@+id/txt_dialog_ok"
+        android:id="@+id/txt_dialog_trending_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/light_blue"
+        android:textColor="@color/colorPrimary"
         android:text="@android:string/ok"
         android:layout_below="@id/txt_dialog_trending_details"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:textSize="@dimen/txt_size_24"
+        android:textSize="@dimen/txt_size_20"
         android:layout_marginTop="@dimen/material_16"
-        android:layout_marginEnd="@dimen/material_24"/>
+        android:layout_marginEnd="@dimen/material_56"/>
 
 </RelativeLayout>
