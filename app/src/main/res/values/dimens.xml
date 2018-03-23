@@ -23,6 +23,8 @@
     <dimen name="material_40">40dp</dimen>
     <dimen name="material_48">48dp</dimen>
     <dimen name="material_56">56dp</dimen>
+    <dimen name="material_500">500</dimen>
+    <dimen name="material_400">400dp</dimen>
 
     <!-- Text sizes -->
     <dimen name="txt_size_12">12sp</dimen>
@@ -31,7 +33,8 @@
     <dimen name="txt_size_18">18sp</dimen>
     <dimen name="txt_size_20">20sp</dimen>
     <dimen name="txt_size_24">24sp</dimen>
-    <dimen name="material_500">500</dimen>
-    <dimen name="material_400">400dp</dimen>
+    <dimen name="txt_size_22">22sp</dimen>
+    <dimen name="material_150">150dp</dimen>
+    <dimen name="material_100">100dp</dimen>
 
 </resources>
