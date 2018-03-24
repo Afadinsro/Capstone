@@ -37,5 +37,6 @@
     <dimen name="txt_size_24">24sp</dimen>
     <dimen name="txt_size_22">22sp</dimen>
     <dimen name="material_200">200dp</dimen>
+    <dimen name="material_300">300dp</dimen>
 
 </resources>

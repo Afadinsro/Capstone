@@ -3,6 +3,7 @@ package com.adino.capstone.trending;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ public class TrendingDialogFragment extends DialogFragment {
         // Populate fields
         txtTitle.setText(getArguments().getString(DIALOG_TITLE));
         txtDetails.setText(getArguments().getString(DIALOG_DETAILS));
+        txtDetails.setMovementMethod(new ScrollingMovementMethod());
         GlideApp.with(getContext())
                 .load(getArguments().getString(DIALOG_IMAGE_URL))
                 .placeholder(R.drawable.ic_autorenew_black_24dp)

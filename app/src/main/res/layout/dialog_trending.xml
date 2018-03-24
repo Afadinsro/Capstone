@@ -18,7 +18,7 @@
         android:contentDescription="@string/default_content_description"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/material_16"
-        android:scaleType="center"/>
+        android:scaleType="center" />
 
     <TextView
         android:id="@+id/txt_dialog_trending_title"
@@ -40,7 +40,12 @@
         android:layout_below="@+id/txt_dialog_trending_title"
         android:gravity="fill_horizontal"
         android:text="@string/default_text"
-        android:textSize="@dimen/txt_size_16" />
+        android:textSize="@dimen/txt_size_16"
+        android:scrollbars="vertical"
+        android:scrollbarSize="@dimen/material_2"
+        android:minHeight="@dimen/material_100"
+        android:maxHeight="@dimen/material_200"
+        />
 
     <TextView
         android:id="@+id/txt_dialog_trending_ok"
@@ -48,10 +53,10 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorPrimary"
         android:text="@android:string/ok"
-        android:layout_below="@id/txt_dialog_trending_details"
-        android:layout_alignParentEnd="true"
-        android:textSize="@dimen/txt_size_20"
         android:layout_marginTop="@dimen/material_16"
-        android:layout_marginEnd="@dimen/material_56"/>
+        android:layout_marginEnd="@dimen/material_56"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:textSize="@dimen/txt_size_20" />
 
 </RelativeLayout>
