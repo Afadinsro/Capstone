@@ -25,8 +25,6 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 
@@ -53,6 +51,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap map;
     private MapView mapView;
+
     private boolean locationPermissionGranted;
     private Context context;
 
@@ -186,12 +185,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        context = null;
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: Map is ready");
-        Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
         map = googleMap;
         map.setBuildingsEnabled(true);
     }
