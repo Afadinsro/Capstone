@@ -29,6 +29,7 @@ import com.adino.capstone.util.BottomNavigationViewHelper;
 import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
@@ -142,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         String cameraPermission = android.Manifest.permission.CAMERA;
         boolean granted = Permissions.checkPermission(getApplicationContext(), cameraPermission);
         setCameraPermissionGranted(granted);
+
+        //SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
 
         fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
         fab_capture_picture.setOnClickListener(new View.OnClickListener() {
@@ -284,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case REQUEST_CAMERA_PERMISSION:
                 if(grantResults[0] != PackageManager.PERMISSION_GRANTED){

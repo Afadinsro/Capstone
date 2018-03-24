@@ -8,8 +8,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 
@@ -49,7 +52,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private String mParam2;
 
     private GoogleMap map;
+    private MapView mapView;
     private boolean locationPermissionGranted;
+    private Context context;
 
     private static final String TAG = "MapFragment";
 
@@ -89,33 +94,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
+
         /*
         Location permissions
          */
-        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION,
+        String[] permissions = { Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
         // Check if location permissions have been granted
-        if(Permissions.checkPermission(getContext(), permissions[0])){
-            if(Permissions.checkPermission(getContext(), permissions[1])){
+        if(ContextCompat.checkSelfPermission(getContext(), permissions[0]) == PackageManager.PERMISSION_GRANTED){
+            if(ContextCompat.checkSelfPermission(getContext(), permissions[1]) == PackageManager.PERMISSION_GRANTED){
                 locationPermissionGranted = true;
             }else {
                 // Ask for location permission if not granted already
                 Log.d(TAG, "onCreate: Requesting for permission");
-                ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+                //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+                requestPermissions(permissions, REQUEST_LOCATION_PERMISSION);
             }
         }else {
             // Ask for location permission if not granted already
-            ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+            //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+            requestPermissions(permissions, REQUEST_LOCATION_PERMISSION);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_map, container, false);
 
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = (MapView) view.findViewById(R.id.map);
+        mapView.onCreate(savedInstanceState);
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onViewCreated: View created.");
+        super.onViewCreated(view, savedInstanceState);
+        if(locationPermissionGranted) {
+            mapView.onCreate(savedInstanceState);
+            mapView.onResume();
+            mapView.getMapAsync(this);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -128,6 +148,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        this.context = context;
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -155,7 +176,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 }
                 Log.d(TAG, "onRequestPermissionsResult: Location permission granted");
                 locationPermissionGranted = true;
-                initMap();
+                mapView.onResume();
+                mapView.getMapAsync(this);
                 break;
         }
     }
@@ -172,13 +194,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
         map = googleMap;
         map.setBuildingsEnabled(true);
-    }
-
-    private void initMap(){
-        Log.d(TAG, "initMap: Initializing map...");
-        SupportMapFragment mapFragment = (SupportMapFragment)getActivity()
-                .getSupportFragmentManager().findFragmentById(R.id.fragment_map);
-        mapFragment.getMapAsync(MapFragment.this);
     }
 
     /**

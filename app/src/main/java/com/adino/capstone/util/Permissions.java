@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
@@ -31,7 +32,7 @@ public final class Permissions {
      */
     public static boolean checkPermission(Context context, String permission) {
         Log.d(TAG, "checkPermission: Checking for permissions...");
-        return ActivityCompat.checkSelfPermission(context, permission)
+        return ContextCompat.checkSelfPermission(context, permission)
                 == PackageManager.PERMISSION_GRANTED;
     }
 }
