@@ -2,20 +2,16 @@ package com.adino.capstone.map;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
@@ -25,8 +21,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
-import static com.adino.capstone.util.Constants.REQUEST_COARSE_LOCATION_PERMISSION;
-import static com.adino.capstone.util.Constants.REQUEST_FINE_LOCATION_PERMISSION;
+import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 
 
 /**
@@ -50,7 +45,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private String mParam2;
 
     private GoogleMap map;
-    private boolean fineLocationPermissionGranted;
+    private boolean locationPermissionGranted;
 
     private static final String TAG = "MapFragment";
 
@@ -87,9 +82,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
         // Ask for location permission if not granted already
         String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION };
-        fineLocationPermissionGranted = Permissions.checkPermission(getActivity(), permissions[0]);
-        if(!fineLocationPermissionGranted){
-            Permissions.requestPermissions(getActivity(), permissions, REQUEST_FINE_LOCATION_PERMISSION);
+        locationPermissionGranted = Permissions.checkPermission(getActivity(), permissions[0]);
+        if(!locationPermissionGranted){
+            Permissions.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
         }
     }
 
@@ -123,7 +118,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_FINE_LOCATION_PERMISSION:
+            case REQUEST_LOCATION_PERMISSION:
 
                 break;
         }

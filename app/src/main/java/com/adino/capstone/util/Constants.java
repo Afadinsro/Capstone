@@ -15,8 +15,7 @@ public final class Constants {
     CODES
      */
     public static final int ERROR_DIALOG_REQUEST = 900;
-    public static final int REQUEST_FINE_LOCATION_PERMISSION = 587;
-    public static final int REQUEST_COARSE_LOCATION_PERMISSION = 345;
+    public static final int REQUEST_LOCATION_PERMISSION = 587;
     public static final int REQUEST_CAMERA_PERMISSION = 200;
     public static final int REQUEST_IMAGE_INTENT = 500;
     public static final int REQUEST_VIDEO_INTENT = 200;
