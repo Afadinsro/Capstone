@@ -53,4 +53,9 @@ public final class Constants {
     Grid Layout
      */
     public static final int GRID_COLUMN_COUNT = 2;
+
+    /*
+    Map constants
+     */
+    public static final float DEFAULT_ZOOM = 15f;
 }

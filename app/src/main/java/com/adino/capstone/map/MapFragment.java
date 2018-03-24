@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,9 +23,17 @@ import com.adino.capstone.R;
 import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
+import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 
@@ -48,7 +57,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
      */
     private String mParam1;
     private String mParam2;
-
+    private FusedLocationProviderClient locationProviderClient;
     private GoogleMap map;
     private MapView mapView;
 
@@ -193,6 +202,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
         map.setBuildingsEnabled(true);
+        if(locationPermissionGranted){
+            getDeviceLocation();
+        }
     }
 
     /**
@@ -228,6 +240,36 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             dialog.show();
         }
         return false;
+    }
+
+    private void getDeviceLocation(){
+        locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        try{
+            if(locationPermissionGranted){
+                Task location = locationProviderClient.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if(task.isSuccessful()){
+                            Log.d(TAG, "onComplete: Found location.");
+                            Location currentLocation = (Location)task.getResult();
+                            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                            moveCamera(latLng, DEFAULT_ZOOM);
+                        }else{
+                            Log.d(TAG, "onComplete: Couldn't find location");
+                            Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }catch (SecurityException e){
+            Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
+        }
+    }
+
+    private void moveCamera(LatLng latLng, float zoom){
+        Log.d(TAG, "moveCamera: Moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
 }
