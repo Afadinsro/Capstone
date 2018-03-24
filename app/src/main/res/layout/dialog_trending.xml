@@ -53,10 +53,10 @@
         android:textColor="@color/colorPrimary"
         android:text="@android:string/ok"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:paddingEnd="@dimen/material_32"
-        android:paddingStart="@dimen/material_32"
-        android:paddingBottom="@dimen/material_16"
+        android:layout_below="@id/txt_dialog_trending_details"
+        android:paddingEnd="@dimen/material_24"
+        android:paddingStart="@dimen/material_24"
+        android:paddingTop="@dimen/material_24"
         android:textSize="@dimen/txt_size_20" />
 
 </RelativeLayout>
