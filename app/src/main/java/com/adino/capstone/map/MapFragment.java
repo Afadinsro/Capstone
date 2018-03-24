@@ -204,6 +204,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         map.setBuildingsEnabled(true);
         if(locationPermissionGranted){
             getDeviceLocation();
+            try {
+                map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(false);
+            }catch (SecurityException e){
+                Log.d(TAG, "onMapReady: SecurityException" + e.getMessage());
+            }
         }
     }
 
