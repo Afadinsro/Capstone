@@ -52,9 +52,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         TrendingFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
-    private FirebaseDatabase firebaseDatabase;
-    private FirebaseDatabase storage;
-
     private int currentNavItem;
 
     /**
@@ -140,12 +137,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Check if Google Play Services is working properly
-        if (!isGoogleServicesOK()) {
-            Toast.makeText(this, "Google Play Service not working properly!", Toast.LENGTH_SHORT).show();
-            finish();
-        }
         //Initial check for whether camera permission has been granted or not
         //setRequestCameraPermission(checkCameraPermission());
         String cameraPermission = android.Manifest.permission.CAMERA;
@@ -308,25 +299,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     }
                 }
         }
-    }
-
-
-    /**
-     * Check if Google Play services is available
-     * @return True if Google Play Services is available, false otherwise.
-     */
-    private boolean isGoogleServicesOK(){
-        // Check if Google play services is okay
-        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
-        if(available == ConnectionResult.SUCCESS){
-            //Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
-            return true;
-        }else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
-            Log.d(TAG, "isGoogleServicesOK: An error occurred but we can fix it");
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, available, ERROR_DIALOG_REQUEST);
-            dialog.show();
-        }
-        return false;
     }
 
     /**

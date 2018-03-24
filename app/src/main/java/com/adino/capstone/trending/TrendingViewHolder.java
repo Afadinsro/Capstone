@@ -86,9 +86,9 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
         txtDescription.setText(model.getDetails());
         GlideApp.with(getContext())
                 .load(model.getImageURL())
-                .placeholder(R.drawable.ic_autorenew_black_24dp)
-                .error(R.drawable.ic_broken_image_black_24dp)
-                .fallback(R.drawable.ic_image_black_24dp)
+                .placeholder(R.drawable.ic_sync_black_200dp)
+                .error(R.drawable.ic_broken_image_black_200dp)
+                .fallback(R.drawable.ic_image_black_200dp)
                 .into(imgTrendingPic);
     }
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
 
@@ -12,6 +13,7 @@ import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
  */
 
 public final class Permissions {
+    private static final String TAG = "Permissions";
 
     /**
      * Requests for given permissions for the given activity
@@ -19,6 +21,7 @@ public final class Permissions {
      * @param permissions Permissions to request
      */
     public static void requestPermissions(Activity activity, String[] permissions,int tag){
+        Log.d(TAG, "requestPermissions: Requesting for permissions...");
         ActivityCompat.requestPermissions(activity, permissions, tag);
     }
 
@@ -27,6 +30,7 @@ public final class Permissions {
      * @return True if the permission has been granted and false if otherwise.
      */
     public static boolean checkPermission(Context context, String permission) {
+        Log.d(TAG, "checkPermission: Checking for permissions...");
         return ActivityCompat.checkSelfPermission(context, permission)
                 == PackageManager.PERMISSION_GRANTED;
     }

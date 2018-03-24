@@ -1,10 +1,14 @@
 package com.adino.capstone.map;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -80,11 +84,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        // Ask for location permission if not granted already
-        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION };
-        locationPermissionGranted = Permissions.checkPermission(getActivity(), permissions[0]);
-        if(!locationPermissionGranted){
-            Permissions.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+        // Check if Google services is working
+        if(!isGoogleServicesOK()){
+            Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
+            getActivity().finish();
+        }
+        /*
+        Location permissions
+         */
+        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
+        // Check if location permissions have been granted
+        if(Permissions.checkPermission(getContext(), permissions[0])){
+            if(Permissions.checkPermission(getContext(), permissions[1])){
+                locationPermissionGranted = true;
+            }else {
+                // Ask for location permission if not granted already
+                Log.d(TAG, "onCreate: Requesting for permission");
+                ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+            }
+        }else {
+            // Ask for location permission if not granted already
+            ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
         }
     }
 
@@ -117,9 +138,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called");
+        locationPermissionGranted = false;
         switch (requestCode) {
             case REQUEST_LOCATION_PERMISSION:
-
+                for(int result: grantResults){
+                    if(result != PackageManager.PERMISSION_GRANTED){
+                        Log.d(TAG, "onRequestPermissionsResult: Location permission denied!");
+                        locationPermissionGranted = false;
+                        // Permission was not granted
+                        Toast.makeText(getContext(), "You cannot use map without location permission.",
+                                Toast.LENGTH_SHORT).show();
+                        getActivity().finish();
+                        break;
+                    }
+                }
+                Log.d(TAG, "onRequestPermissionsResult: Location permission granted");
+                locationPermissionGranted = true;
+                initMap();
                 break;
         }
     }
@@ -132,11 +168,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.d(TAG, "onMapReady: Map is ready");
         Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
         map = googleMap;
+        map.setBuildingsEnabled(true);
     }
 
     private void initMap(){
+        Log.d(TAG, "initMap: Initializing map...");
         SupportMapFragment mapFragment = (SupportMapFragment)getActivity()
                 .getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mapFragment.getMapAsync(MapFragment.this);
@@ -162,6 +201,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
      * @return True if Google Play Services is available, false otherwise.
      */
     private boolean isGoogleServicesOK(){
+        Log.d(TAG, "isGoogleServicesOK: Checking if Google play services is working correctly.");
         // Check if Google play services is okay
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
         if(available == ConnectionResult.SUCCESS){
