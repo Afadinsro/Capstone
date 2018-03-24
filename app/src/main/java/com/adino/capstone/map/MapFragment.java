@@ -1,17 +1,32 @@
 package com.adino.capstone.map;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
+import com.adino.capstone.util.Permissions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+
+import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.adino.capstone.util.Constants.REQUEST_COARSE_LOCATION_PERMISSION;
+import static com.adino.capstone.util.Constants.REQUEST_FINE_LOCATION_PERMISSION;
 
 
 /**
@@ -22,16 +37,22 @@ import com.adino.capstone.R;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements OnMapReadyCallback {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final int LOCATION_REQUEST = 254;
 
-    // TODO: Rename and change types of parameters
+    /**
+     * Parameters
+     */
     private String mParam1;
     private String mParam2;
+
+    private GoogleMap map;
+    private boolean fineLocationPermissionGranted;
+
+    private static final String TAG = "MapFragment";
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,6 +85,12 @@ public class MapFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        // Ask for location permission if not granted already
+        String[] permissions = { android.Manifest.permission.ACCESS_FINE_LOCATION };
+        fineLocationPermissionGranted = Permissions.checkPermission(getActivity(), permissions[0]);
+        if(!fineLocationPermissionGranted){
+            Permissions.requestPermissions(getActivity(), permissions, REQUEST_FINE_LOCATION_PERMISSION);
+        }
     }
 
     @Override
@@ -71,11 +98,6 @@ public class MapFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-        // Ask for location permission if not granted already
-        if ( ContextCompat.checkSelfPermission( getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-
-            ActivityCompat.requestPermissions( getActivity(), new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  }, LOCATION_REQUEST );
-        }
 
         return view;
     }
@@ -99,9 +121,30 @@ public class MapFragment extends Fragment {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_FINE_LOCATION_PERMISSION:
+
+                break;
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
+        map = googleMap;
+    }
+
+    private void initMap(){
+        SupportMapFragment mapFragment = (SupportMapFragment)getActivity()
+                .getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+        mapFragment.getMapAsync(MapFragment.this);
     }
 
     /**
@@ -119,5 +162,23 @@ public class MapFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
+    /**
+     * Check if Google Play services is available
+     * @return True if Google Play Services is available, false otherwise.
+     */
+    private boolean isGoogleServicesOK(){
+        // Check if Google play services is okay
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
+        if(available == ConnectionResult.SUCCESS){
+            //Toast.makeText(this, "Google Play services is OK", Toast.LENGTH_SHORT).show();
+            return true;
+        }else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            Log.d(TAG, "isGoogleServicesOK: An error occurred but we can fix it");
+            Dialog dialog = GoogleApiAvailability.getInstance()
+                    .getErrorDialog(getActivity(), available, ERROR_DIALOG_REQUEST);
+            dialog.show();
+        }
+        return false;
+    }
 
 }

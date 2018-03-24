@@ -26,10 +26,9 @@ import com.adino.capstone.map.MapFragment;
 import com.adino.capstone.reports.ReportsFragment;
 import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
+import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
@@ -50,10 +49,8 @@ import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
-        TrendingFragment.OnFragmentInteractionListener, OnMapReadyCallback{
+        TrendingFragment.OnFragmentInteractionListener{
 
-    private static final int REQUEST_IMAGE_CAPTURE = 222;
-    private static final int CAMERA_REQUEST = 244;
     private static final String TAG = "MainActivity";
     private FirebaseDatabase firebaseDatabase;
     private FirebaseDatabase storage;
@@ -63,7 +60,9 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     /**
      *
      */
-    private boolean camera_permission_granted = false;
+    private boolean cameraPermissionGranted = false;
+    private boolean storagePermissionGranted = false;
+
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -148,23 +147,21 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             finish();
         }
         //Initial check for whether camera permission has been granted or not
-        setRequestCameraPermission(checkCameraPermission());
+        //setRequestCameraPermission(checkCameraPermission());
+        String cameraPermission = android.Manifest.permission.CAMERA;
+        boolean granted = Permissions.checkPermission(getApplicationContext(), cameraPermission);
+        setCameraPermissionGranted(granted);
 
         fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
         fab_capture_picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!camera_permission_granted) {
+                if (!cameraPermissionGranted) {
                     // Request for permission to be granted
-                    requestCameraStoragePermission();
-                    // Camera permission granted
-                    if (camera_permission_granted) {
-                        Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        // Ensure that there's a camera activity to handle the intent
-                        if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
-                            startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
-                        }
-                    }
+                    String[] permissions = {android.Manifest.permission.CAMERA,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    };
+                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
                 } else {
                     // Permission granted already
                     Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -179,16 +176,18 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         fab_capture_video.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!camera_permission_granted) {
-                    requestCameraStoragePermission();
-                    // Camera permission granted
-                    if (camera_permission_granted) {
-                        Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                        startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
-                    }
+                if (!cameraPermissionGranted) {
+                    // Request for permission to be granted
+                    String[] permissions = {android.Manifest.permission.CAMERA,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    };
+                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
                 } else {
                     Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                    startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
+                    // Ensure that there's a camera activity to handle the intent
+                    if (toVideoCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
+                    }
                 }
             }
         });
@@ -247,11 +246,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_INTENT) {
@@ -306,7 +300,12 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                             Toast.LENGTH_SHORT).show();
                     finish();
                 }else {
-                    camera_permission_granted = true;
+                    cameraPermissionGranted = true;
+                    Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    // Ensure that there's a camera activity to handle the intent
+                    if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                    }
                 }
         }
     }
@@ -401,29 +400,14 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     }
 
     /**
-     * Check if Camera permission has been granted
-     * @return True if camera permission has been granted and false if otherwise.
-     */
-    private boolean checkCameraPermission() {
-        return ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    /**
-     * Requests for Camera and Storage permissions
-     */
-    private void requestCameraStoragePermission(){
-        String[] permissions = {android.Manifest.permission.CAMERA,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_CAMERA_PERMISSION);
-    }
-
-    /**
-     * Setter for camera_permission_granted
+     * Setter for cameraPermissionGranted
      * @param granted Boolean value to set to
      */
-    private void setRequestCameraPermission(boolean granted){
-        camera_permission_granted = granted;
+    public void setCameraPermissionGranted(boolean granted) {
+        this.cameraPermissionGranted = granted;
+    }
+
+    public void setStoragePermissionGranted(boolean granted) {
+        this.storagePermissionGranted = granted;
     }
 }
