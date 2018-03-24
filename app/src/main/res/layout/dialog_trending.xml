@@ -30,8 +30,7 @@
         android:textSize="@dimen/txt_size_24"
         android:textStyle="bold"
         android:textColor="@color/black"
-        android:layout_marginBottom="@dimen/material_8"
-        android:layout_marginTop="@dimen/material_4"/>
+        android:layout_marginBottom="@dimen/material_8"/>
 
     <TextView
         android:id="@+id/txt_dialog_trending_details"
@@ -53,10 +52,11 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorPrimary"
         android:text="@android:string/ok"
-        android:layout_marginTop="@dimen/material_16"
-        android:layout_marginEnd="@dimen/material_56"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
+        android:paddingEnd="@dimen/material_32"
+        android:paddingStart="@dimen/material_32"
+        android:paddingBottom="@dimen/material_16"
         android:textSize="@dimen/txt_size_20" />
 
 </RelativeLayout>
