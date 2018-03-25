@@ -55,6 +55,7 @@ dependencies {
     implementation "com.google.firebase:firebase-database:$playFirebaseVersion"
     implementation "com.google.android.gms:play-services-maps:$playFirebaseVersion"
     implementation "com.google.android.gms:play-services-location:$playFirebaseVersion"
+    implementation "com.google.android.gms:play-services-places:$playFirebaseVersion"
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
 
     /**
