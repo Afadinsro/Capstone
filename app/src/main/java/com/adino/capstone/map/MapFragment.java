@@ -155,7 +155,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 Log.d(TAG, "onEditorAction: Called.");
                 if(actionId == EditorInfo.IME_ACTION_SEARCH
                         || actionId == EditorInfo.IME_ACTION_DONE
-                        //|| event.getAction() == KeyEvent.ACTION_DOWN
+                        || event.getAction() == KeyEvent.ACTION_DOWN
                         || event.getAction() == KeyEvent.KEYCODE_ENTER){
 
                     geoLocate();
