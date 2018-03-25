@@ -39,7 +39,10 @@
             android:textColor="@color/black"
             android:background="@null"
             android:hint="@string/map_search_hint"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"
+            android:inputType="text"/>
 
     </RelativeLayout>
 

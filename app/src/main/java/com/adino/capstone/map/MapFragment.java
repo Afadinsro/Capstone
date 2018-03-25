@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,9 +16,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adino.capstone.R;
@@ -32,6 +38,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
@@ -63,6 +73,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private boolean locationPermissionGranted;
     private Context context;
+    private EditText txtSearch;
 
     private static final String TAG = "MapFragment";
 
@@ -132,7 +143,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = (MapView) view.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
+        txtSearch = (EditText)view.findViewById(R.id.txt_search_field);
         return view;
+    }
+
+    private void initSearchBar() {
+        Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
+        txtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d(TAG, "onEditorAction: Called.");
+                if(actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE
+                        //|| event.getAction() == KeyEvent.ACTION_DOWN
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
+
+                    geoLocate();
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -203,6 +233,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         map = googleMap;
         map.setBuildingsEnabled(true);
         if(locationPermissionGranted){
+            initSearchBar();
             getDeviceLocation();
             try {
                 map.setMyLocationEnabled(true);
@@ -210,6 +241,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }catch (SecurityException e){
                 Log.d(TAG, "onMapReady: SecurityException" + e.getMessage());
             }
+
+
         }
     }
 
@@ -249,7 +282,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void getDeviceLocation(){
-        locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        locationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
         try{
             if(locationPermissionGranted){
                 Task location = locationProviderClient.getLastLocation();
@@ -263,13 +296,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             moveCamera(latLng, DEFAULT_ZOOM);
                         }else{
                             Log.d(TAG, "onComplete: Couldn't find location");
-                            Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
         }catch (SecurityException e){
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
+        }
+    }
+
+    private void geoLocate() {
+        Log.d(TAG, "geoLocate: Geolocating...");
+        String searchString = txtSearch.getText().toString();
+        Geocoder geocoder = new Geocoder(getContext());
+        List<Address> addresses = new ArrayList<>();
+        try{
+            // Get 1 result from search
+            addresses = geocoder.getFromLocationName(searchString, 1);
+        } catch (IOException e) {
+            Log.d(TAG, "geoLocate: IOException: " + e.getMessage());
+        }
+
+        if(addresses.size() > 0){
+            Address address = addresses.get(0);
+            Log.d(TAG, "geoLocate: Location found: " + address.toString());
+            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            moveCamera(latLng, DEFAULT_ZOOM);
+            // An address was found
+
         }
     }
 
