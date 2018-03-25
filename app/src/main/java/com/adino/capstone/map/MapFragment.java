@@ -59,13 +59,7 @@ import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener {
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
+public class MapFragment extends Fragment implements OnMapReadyCallback{
 
 
     // TODO: Rename parameter arguments, choose names that match
