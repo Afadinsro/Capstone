@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -21,7 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,8 +28,11 @@ import com.adino.capstone.R;
 import com.adino.capstone.util.Permissions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -46,6 +48,7 @@ import java.util.List;
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
+import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
 
 /**
@@ -56,7 +59,15 @@ import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -73,7 +84,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private boolean locationPermissionGranted;
     private Context context;
-    private EditText txtSearch;
+    private AutoCompleteTextView txtSearch;
+
+    private PlaceAutocompleteAdapter placeAutocompleteAdapter;
+    private GeoDataClient geoDataClient;
 
     private static final String TAG = "MapFragment";
 
@@ -114,6 +128,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             getActivity().finish();
         }
 
+
         /*
         Location permissions
          */
@@ -143,12 +158,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         mapView = (MapView) view.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
-        txtSearch = (EditText)view.findViewById(R.id.txt_search_field);
+        txtSearch = (AutoCompleteTextView) view.findViewById(R.id.txt_search_field);
         return view;
     }
 
     private void initSearchBar() {
         Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
+        // Initialize GeoDataClient
+        geoDataClient = Places.getGeoDataClient(getContext(), null);
+
+        // Initialize Places autocomplete adapter
+        placeAutocompleteAdapter = new PlaceAutocompleteAdapter(getContext(), geoDataClient,
+                WORLD_LAT_LNG_BOUNDS, null);
+        // Set autocomplete edit text view adapter
+        txtSearch.setAdapter(placeAutocompleteAdapter);
+
         txtSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

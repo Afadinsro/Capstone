@@ -1,6 +1,8 @@
 package com.adino.capstone.util;
 
 import com.adino.capstone.model.DisasterCategory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 /**
  * Created by afadinsro on 1/4/18.
@@ -58,4 +60,7 @@ public final class Constants {
     Map constants
      */
     public static final float DEFAULT_ZOOM = 15f;
+    public static final LatLngBounds WORLD_LAT_LNG_BOUNDS = new LatLngBounds(
+            new LatLng(-40, -168),
+            new LatLng(71, 136));
 }

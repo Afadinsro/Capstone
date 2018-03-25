@@ -30,7 +30,7 @@
             app:srcCompat="@drawable/ic_search_black_24dp"
             android:contentDescription="@string/default_content_description"/>
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/txt_search_field"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
