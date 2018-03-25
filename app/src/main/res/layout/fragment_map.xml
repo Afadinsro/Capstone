@@ -1,14 +1,46 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.adino.capstone.map.MapFragment">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/bottom_nav_height"
-        />
+        android:layout_marginBottom="@dimen/bottom_nav_height" />
+
+    <RelativeLayout
+        android:id="@+id/rl_map_search"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/material_56"
+        android:background="@drawable/white_border"
+        android:layout_marginTop="@dimen/material_8"
+        android:layout_marginStart="@dimen/material_16"
+        android:layout_marginEnd="@dimen/material_16">
+
+        <ImageView
+            android:id="@+id/search_mag_icon"
+            android:layout_width="@dimen/material_24"
+            android:layout_height="@dimen/material_24"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/material_16"
+            android:layout_marginEnd="@dimen/material_16"
+            app:srcCompat="@drawable/ic_search_black_24dp"
+            android:contentDescription="@string/default_content_description"/>
+
+        <EditText
+            android:id="@+id/txt_search_field"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/search_mag_icon"
+            android:textSize="@dimen/txt_size_20"
+            android:textColor="@color/black"
+            android:background="@null"
+            android:hint="@string/map_search_hint"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
 </FrameLayout>

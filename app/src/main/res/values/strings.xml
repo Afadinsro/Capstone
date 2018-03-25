@@ -63,4 +63,5 @@
     <string name="caption_placeholder">Caption</string>
     <string name="category_placeholder">Category</string>
     <string name="default_text">Text</string>
+    <string name="map_search_hint">Enter Address or City...</string>
 </resources>
