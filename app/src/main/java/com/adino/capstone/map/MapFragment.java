@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 
 import com.adino.capstone.R;
 import com.adino.capstone.util.Permissions;
+import com.adino.capstone.util.Util;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -45,6 +47,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.datatype.Duration;
+
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
@@ -59,7 +63,8 @@ import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
  * Use the {@link MapFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback{
+public class MapFragment extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.OnConnectionFailedListener{
 
 
     // TODO: Rename parameter arguments, choose names that match
@@ -81,6 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private AutoCompleteTextView txtSearch;
 
     private PlaceAutocompleteAdapter placeAutocompleteAdapter;
+    private GoogleApiClient googleApiClient;
     private GeoDataClient geoDataClient;
 
     private static final String TAG = "MapFragment";
@@ -129,8 +135,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         String[] permissions = { Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
         // Check if location permissions have been granted
-        if(ContextCompat.checkSelfPermission(getContext(), permissions[0]) == PackageManager.PERMISSION_GRANTED){
-            if(ContextCompat.checkSelfPermission(getContext(), permissions[1]) == PackageManager.PERMISSION_GRANTED){
+        if(Permissions.checkPermission(getContext(), permissions[0])){
+            if(Permissions.checkPermission(getContext(), permissions[1])){
                 locationPermissionGranted = true;
             }else {
                 // Ask for location permission if not granted already
@@ -160,6 +166,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
         // Initialize GeoDataClient
         geoDataClient = Places.getGeoDataClient(getContext(), null);
+        googleApiClient = new GoogleApiClient
+                .Builder(getContext())
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .enableAutoManage(getActivity(), this)
+                .build();
+
+
 
         // Initialize Places autocomplete adapter
         placeAutocompleteAdapter = new PlaceAutocompleteAdapter(getContext(), geoDataClient,
@@ -250,9 +264,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
         map.setBuildingsEnabled(true);
+        LatLng currentLocation;
         if(locationPermissionGranted){
             initSearchBar();
             getDeviceLocation();
+
+//            currentLocation =  Util.getDeviceLocation(getActivity());
+//            moveCamera(currentLocation, DEFAULT_ZOOM);
             try {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -261,6 +279,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             }
 
 
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        int errorCode = connectionResult.getErrorCode();
+        if (errorCode == ConnectionResult.API_UNAVAILABLE){
+            Snackbar.make(txtSearch, "Google Places API unavailable. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.NETWORK_ERROR){
+            Snackbar.make(txtSearch, "Network error. Check your internet connection. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.CANCELED){
+            Snackbar.make(txtSearch, "Connection cancelled. Check your internet connection. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.TIMEOUT){
+            Snackbar.make(txtSearch, "Connection timed out. Check your internet connection and try again. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
         }
     }
 
@@ -350,5 +386,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         Log.d(TAG, "moveCamera: Moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
+
 
 }

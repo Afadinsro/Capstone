@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -16,6 +17,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -27,9 +30,12 @@ import com.adino.capstone.reports.ReportsFragment;
 import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
 import com.adino.capstone.util.Permissions;
+import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
@@ -37,6 +43,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -46,6 +54,7 @@ import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
+import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
@@ -60,7 +69,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
      */
     private boolean cameraPermissionGranted = false;
     private boolean storagePermissionGranted = false;
+    private boolean signedIn = false;
 
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private FirebaseAuth firebaseAuth;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -137,96 +149,46 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //Initial check for whether camera permission has been granted or not
-        //setRequestCameraPermission(checkCameraPermission());
-        String cameraPermission = android.Manifest.permission.CAMERA;
-        boolean granted = Permissions.checkPermission(getApplicationContext(), cameraPermission);
-        setCameraPermissionGranted(granted);
 
-        //SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
-
-        fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
-        fab_capture_picture.setOnClickListener(new View.OnClickListener() {
+        firebaseAuth = FirebaseAuth.getInstance();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
-            public void onClick(View v) {
-                if (!cameraPermissionGranted) {
-                    // Request for permission to be granted
-                    String[] permissions = {android.Manifest.permission.CAMERA,
-                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    };
-                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
-                } else {
-                    // Permission granted already
-                    Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    // Ensure that there's a camera activity to handle the intent
-                    if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
-                    }
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null){
+                    // User is signed in
+                    signedIn = true;
+                }else{
+                    // User is not signed in
+                    signedIn = false;
+//                    AuthUI.IdpConfig phoneIdpConfig = new AuthUI.IdpConfig().;
+                    startActivityForResult(
+                            AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setPrivacyPolicyUrl("https://superapp.example.com/privacy-policy.html")
+                            .setTosUrl("https://superapp.example.com/terms-of-service.html")
+                            .setIsSmartLockEnabled(!BuildConfig.DEBUG, true)
+                            .setLogo(R.mipmap.ic_launcher_round)
+                            .setAvailableProviders(
+                                    /*
+                                    Use Arrays.asList() for multiple providers
+                                    Use Collections.singletonList() for single provider
+                                     */
+                                    Arrays.asList(
+                                            new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build(),
+                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
+                                    )
+                            ).build(),
+                            REQUEST_SIGN_IN
+                    );
                 }
             }
-        });
-        fab_capture_video = (FloatingActionButton) findViewById(R.id.fab_capture_video);
-        fab_capture_video.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!cameraPermissionGranted) {
-                    // Request for permission to be granted
-                    String[] permissions = {android.Manifest.permission.CAMERA,
-                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    };
-                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
-                } else {
-                    Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-                    // Ensure that there's a camera activity to handle the intent
-                    if (toVideoCaptureIntent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
-                    }
-                }
-            }
-        });
-
-        /*
-        Bottom navigation initialization
-        Default animation is disabled for a better one.
-        OnItemSelected and Reselected listeners attached.
-        The reselected listener helps to manage reselecting the capture item better.
-        After reselecting capture, go back to previously selected nav item
-         */
-        navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
-        BottomNavigationViewHelper.disableShiftMode(navigation);
-        /*
-         Initialize content view to Trending
-         A fragment transaction helps to switch between fragments in the MainActivity.
-          */
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        // Navigate based on calling activity
-        Intent callingIntent = getIntent();
-
-        boolean detailsToReports = false; // Navigating from details to reports?
-        if (callingIntent.getExtras() != null) {
-            detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
-            String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
-            String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
-            // Check to make sure its from DetailsActivity
-            if (detailsToReports) {
-                navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
-                fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey, path)).commitAllowingStateLoss();
-            }else{
-                navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
-            }
-        }else{
-            // No extras in calling intent
-            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-            fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+        };
+        signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
+        if(signedIn) {
+            init();
         }
 
-
-        currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
     }
 
     @Override
@@ -241,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_INTENT) {
             if (resultCode == RESULT_OK) {
                 // Get Image
@@ -279,8 +241,17 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }else if(resultCode == RESULT_CANCELED){
                 navigation.setSelectedItemId(currentNavItem);
             }
-        }else if(requestCode == 1){
-
+        }else if(requestCode == REQUEST_SIGN_IN){
+            if(resultCode == RESULT_OK){
+                signedIn = true;
+                init();
+                Snackbar.make(navigation, "You are signed in!", Snackbar.LENGTH_SHORT);
+                Toast.makeText(this, "You are signed in!", Toast.LENGTH_SHORT).show();
+            }else if (resultCode == RESULT_CANCELED){
+                signedIn = false;
+                Toast.makeText(MainActivity.this,"Sign in cancelled!", Toast.LENGTH_SHORT).show();
+                finish();
+            }
         }
     }
 
@@ -386,4 +357,163 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     public void setStoragePermissionGranted(boolean granted) {
         this.storagePermissionGranted = granted;
     }
+
+    @Override
+    protected void onPause() {
+        Log.d(TAG, "onPause: called");
+        super.onPause();
+        if(authStateListener != null) {
+            firebaseAuth.removeAuthStateListener(authStateListener);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart: called");
+        super.onStart();
+        if(signedIn) {
+            init();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart: called");
+        super.onRestart();
+        if(signedIn) {
+            init();
+        }
+    }
+
+    private void init() {
+        setContentView(R.layout.activity_main);
+
+        initCameraPermission();
+
+        initCaptureFABs();
+
+        initBottomNav();
+        /*
+         Initialize content view to Trending
+         A fragment transaction helps to switch between fragments in the MainActivity.
+          */
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        // Navigate based on calling activity
+        Intent callingIntent = getIntent();
+
+        boolean detailsToReports = false; // Navigating from details to reports?
+        if (callingIntent.getExtras() != null) {
+            detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+            String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
+            String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
+            // Check to make sure its from DetailsActivity
+            if (detailsToReports) {
+                navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
+                fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey, path)).commitAllowingStateLoss();
+            } else {
+                navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+            }
+        } else {
+            // No extras in calling intent
+            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+            fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+        }
+
+
+        currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
+    }
+
+    private void initCameraPermission() {
+        //Initial check for whether camera permission has been granted or not
+        String cameraPermission = android.Manifest.permission.CAMERA;
+        boolean granted = Permissions.checkPermission(getApplicationContext(), cameraPermission);
+        setCameraPermissionGranted(granted);
+    }
+
+    private void initCaptureFABs() {
+        fab_capture_picture = (FloatingActionButton) findViewById(R.id.fab_capture_picture);
+        fab_capture_picture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!cameraPermissionGranted) {
+                    // Request for permission to be granted
+                    String[] permissions = {android.Manifest.permission.CAMERA,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    };
+                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
+                } else {
+                    // Permission granted already
+                    Intent toImageCaptureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    // Ensure that there's a camera activity to handle the intent
+                    if (toImageCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
+                    }
+                }
+            }
+        });
+        fab_capture_video = (FloatingActionButton) findViewById(R.id.fab_capture_video);
+        fab_capture_video.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!cameraPermissionGranted) {
+                    // Request for permission to be granted
+                    String[] permissions = {android.Manifest.permission.CAMERA,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    };
+                    Permissions.requestPermissions(MainActivity.this, permissions, REQUEST_CAMERA_PERMISSION);
+                } else {
+                    Intent toVideoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                    // Ensure that there's a camera activity to handle the intent
+                    if (toVideoCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                        startActivityForResult(toVideoCaptureIntent, REQUEST_VIDEO_INTENT);
+                    }
+                }
+            }
+        });
+    }
+
+    private void initBottomNav() {
+        /*
+        Bottom navigation initialization
+        Default animation is disabled for a better one.
+        OnItemSelected and Reselected listeners attached.
+        The reselected listener helps to manage reselecting the capture item better.
+        After reselecting capture, go back to previously selected nav item
+         */
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
+        BottomNavigationViewHelper.disableShiftMode(navigation);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        firebaseAuth.addAuthStateListener(authStateListener);
+        if(signedIn) {
+            init();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.sign_out_menu:
+                // Sign out
+                AuthUI.getInstance().signOut(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 }

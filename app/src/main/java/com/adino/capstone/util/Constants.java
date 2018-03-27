@@ -20,7 +20,8 @@ public final class Constants {
     public static final int REQUEST_LOCATION_PERMISSION = 587;
     public static final int REQUEST_CAMERA_PERMISSION = 200;
     public static final int REQUEST_IMAGE_INTENT = 500;
-    public static final int REQUEST_VIDEO_INTENT = 200;
+    public static final int REQUEST_VIDEO_INTENT = 20890;
+    public static final int REQUEST_SIGN_IN = 573;
 
     /*
     TAGS
