@@ -1,6 +1,5 @@
 package com.adino.capstone;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -9,7 +8,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
@@ -31,12 +29,8 @@ import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
 import com.adino.capstone.util.Permissions;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,11 +38,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
@@ -507,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.sign_out_menu:
+            case R.id.menu_sign_out:
                 // Sign out
                 AuthUI.getInstance().signOut(this);
                 return true;

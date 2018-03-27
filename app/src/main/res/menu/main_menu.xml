@@ -3,10 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/sign_out_menu"
-        android:title="@string/sign_out"
-        android:icon="@drawable/ic_logout"
-        android:iconTint="@color/colorAccent"
-        
+        android:id="@+id/menu_profile"
+        android:title="@string/profile"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_sign_out"
+        android:title="@string/sign_out"
+        app:showAsAction="never"/>
+
+
 </menu>

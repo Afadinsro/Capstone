@@ -63,6 +63,7 @@
     <string name="caption_placeholder">Caption</string>
     <string name="category_placeholder">Category</string>
     <string name="default_text">Text</string>
-    <string name="map_search_hint">Enter Address or City...</string>
-    <string name="sign_out">Sign out...</string>
+    <string name="map_search_hint">Enter Address or City&#8230;</string>
+    <string name="sign_out">Sign out&#8230;</string>
+    <string name="profile">Profile</string>
 </resources>
