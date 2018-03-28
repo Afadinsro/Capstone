@@ -2,6 +2,7 @@ package com.adino.capstone.util;
 
 import android.content.Context;
 import android.location.Location;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -64,5 +65,21 @@ public final class Util {
 
     public static void setLatLng(LatLng mLatLng) {
         latLng = new LatLng(mLatLng.latitude, mLatLng.longitude);
+    }
+
+    /**
+     * Checks if GPS is on or off
+     * @param context Context
+     * @return True if GPS is on and false if otherwise.
+     */
+    public static boolean isGPSOn(Context context){
+        boolean gpsOn = false;
+        LocationManager locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        try {
+            gpsOn = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }catch (NullPointerException e){
+            Log.d(TAG, "isGPSOn: Location manager is null.");
+        }
+        return gpsOn;
     }
 }

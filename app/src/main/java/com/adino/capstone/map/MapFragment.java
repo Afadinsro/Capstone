@@ -47,8 +47,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.datatype.Duration;
-
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
@@ -162,16 +160,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+    }
+
     private void initSearchBar() {
         Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
         // Initialize GeoDataClient
-        geoDataClient = Places.getGeoDataClient(getContext(), null);
-        googleApiClient = new GoogleApiClient
-                .Builder(getContext())
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(getActivity(), this)
-                .build();
+        geoDataClient = Places.getGeoDataClient(context, null);
+
 
 
 
@@ -336,24 +341,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private void getDeviceLocation(){
-        locationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+        locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         try{
             if(locationPermissionGranted){
-                Task location = locationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if(task.isSuccessful()){
-                            Log.d(TAG, "onComplete: Found location.");
-                            Location currentLocation = (Location)task.getResult();
-                            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                            moveCamera(latLng, DEFAULT_ZOOM);
-                        }else{
-                            Log.d(TAG, "onComplete: Couldn't find location");
-                            Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                if(Util.isGPSOn(context)) {
+                    // GPS is on
+                    Task location = locationProviderClient.getLastLocation();
+                    location.addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "onComplete: Found location.");
+                                Location currentLocation = (Location) task.getResult();
+                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                                moveCamera(latLng, DEFAULT_ZOOM);
+                            } else {
+                                Log.d(TAG, "onComplete: Couldn't find location");
+                                Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                }else{
+                    // GPS is off
+                    Toast.makeText(context, "GPS is off", Toast.LENGTH_SHORT).show();
+                }
             }
         }catch (SecurityException e){
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
