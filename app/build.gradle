@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     defaultConfig {
         applicationId "com.adino.capstone"
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -21,9 +21,9 @@ android {
 }
 
 ext {
-    supportVersion = "26.1.0"
-    playFirebaseVersion = "11.4.2"
-    firebaseUIVersion = "3.1.0"
+    supportVersion = "27.0.2"
+    playFirebaseVersion = "11.8.0"
+    firebaseUIVersion = "3.2.2"
     glideVersion = "4.6.1"
 }
 
@@ -46,7 +46,7 @@ dependencies {
 
     /**
      *  Firebase & FirebaseUI
-     *  FirebaseUI 3.1.0 requires Firebase/Play Services 11.4.2
+     *  FirebaseUI 3.2.2 requires Firebase/Play Services 11.8.0
      */
     implementation "com.firebaseui:firebase-ui-auth:$firebaseUIVersion"
     implementation "com.google.firebase:firebase-storage:$playFirebaseVersion"
@@ -58,13 +58,12 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:$playFirebaseVersion"
     implementation "com.google.android.gms:play-services-places:$playFirebaseVersion"
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+    implementation "com.google.firebase:firebase-messaging:$playFirebaseVersion"
 
     /**
      *  Glide Image Loader
      */
-    implementation("com.github.bumptech.glide:glide:$glideVersion") {
-        exclude group: 'com.android.support'
-    }
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
     implementation("com.github.bumptech.glide:recyclerview-integration:$glideVersion") {
         // Excludes the support library because it's already included by Glide.
