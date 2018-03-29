@@ -22,6 +22,7 @@ public final class Constants {
     public static final int REQUEST_IMAGE_INTENT = 500;
     public static final int REQUEST_VIDEO_INTENT = 20890;
     public static final int REQUEST_SIGN_IN = 573;
+    public static final int REQUEST_GPS_ENABLE = 389;
 
     /*
     TAGS

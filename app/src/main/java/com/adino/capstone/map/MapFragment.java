@@ -4,16 +4,20 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -47,8 +51,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.Context.LOCATION_SERVICE;
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
@@ -86,8 +92,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private PlaceAutocompleteAdapter placeAutocompleteAdapter;
     private GoogleApiClient googleApiClient;
     private GeoDataClient geoDataClient;
+    private LocationManager locationManager;
 
     private static final String TAG = "MapFragment";
+    private boolean isGPSOn = false;
 
     private OnFragmentInteractionListener mListener;
 
@@ -125,6 +133,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
+        context = getActivity().getApplicationContext();
+
 
 
         /*
@@ -158,6 +168,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mapView.onCreate(savedInstanceState);
         txtSearch = (AutoCompleteTextView) view.findViewById(R.id.txt_search_field);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        isGPSOn = Util.isGPSOn(context);
+        if(!isGPSOn){
+            Util.promptGPSOff(getActivity());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isGPSOn = Util.isGPSOn(context);
+
     }
 
     @Override
@@ -224,11 +250,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
+        isGPSOn = Util.isGPSOn(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case REQUEST_GPS_ENABLE:
+                isGPSOn = Util.isGPSOn(context);
+                if(isGPSOn){
+                    // Get device location
+                    getDeviceLocation();
+                }else{
+                    // Location was not turned on
+                    FragmentManager fragmentManager = getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
+                }
+                break;
         }
     }
 
@@ -346,6 +392,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             if(locationPermissionGranted){
                 if(Util.isGPSOn(context)) {
                     // GPS is on
+                    Log.d(TAG, "getDeviceLocation: GPS is on");
                     Task location = locationProviderClient.getLastLocation();
                     location.addOnCompleteListener(new OnCompleteListener() {
                         @Override
@@ -363,7 +410,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     });
                 }else{
                     // GPS is off
-                    Toast.makeText(context, "GPS is off", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "getDeviceLocation: GPS is off");
                 }
             }
         }catch (SecurityException e){

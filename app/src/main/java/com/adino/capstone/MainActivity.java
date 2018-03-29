@@ -45,6 +45,7 @@ import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
+import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
@@ -244,6 +245,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 Toast.makeText(MainActivity.this,"Sign in cancelled!", Toast.LENGTH_SHORT).show();
                 finish();
             }
+        }else if(requestCode == REQUEST_GPS_ENABLE){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+//            fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
         }
     }
 
