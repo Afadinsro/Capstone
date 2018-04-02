@@ -59,4 +59,16 @@
         android:paddingTop="@dimen/material_24"
         android:textSize="@dimen/txt_size_20" />
 
+    <ImageView
+        android:id="@+id/img_subscribe"
+        android:layout_width="@dimen/material_80"
+        android:layout_height="@dimen/material_56"
+        app:srcCompat="@drawable/ic_notifications_off_black_24dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/txt_dialog_trending_details"
+        android:paddingTop="@dimen/material_24"
+        android:paddingEnd="@dimen/material_24"
+        android:tint="@color/grey"
+        android:paddingStart="@dimen/material_24"/>
+
 </RelativeLayout>

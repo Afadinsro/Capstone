@@ -3,6 +3,7 @@ package com.adino.capstone.trending;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -107,7 +108,7 @@ public class TrendingFragment extends Fragment {
                 .build();
         adapter = new FirebaseRecyclerAdapter<Trending, TrendingViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(TrendingViewHolder holder, int position, Trending model) {
+            protected void onBindViewHolder(@NonNull TrendingViewHolder holder, int position, @NonNull Trending model) {
                 Log.d(TAG, "onBindViewHolder: Model: " + model.getTitle());
                 holder.bindViewHolder(model);
             }

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.adino.capstone.R;
 import com.adino.capstone.glide.GlideApp;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * Created by afadinsro on 3/23/18.
@@ -25,6 +26,7 @@ public class TrendingDialogFragment extends DialogFragment {
     private static final String TAG = "TrendingDialogFragment";
 
     private ImageView imgTrendingPic;
+    private ImageView imgSubscribe;
     private TextView txtDetails;
     private TextView txtTitle;
     private TextView txtActionOK;
@@ -38,6 +40,7 @@ public class TrendingDialogFragment extends DialogFragment {
         txtTitle = (TextView) view.findViewById(R.id.txt_dialog_trending_title);
         imgTrendingPic = (ImageView)view.findViewById(R.id.dialog_img_trending_pic);
         txtActionOK = (TextView)view.findViewById(R.id.txt_dialog_trending_ok);
+        imgSubscribe = (ImageView) view.findViewById(R.id.img_subscribe);
 
         // Populate fields
         txtTitle.setText(getArguments().getString(DIALOG_TITLE));
@@ -49,6 +52,14 @@ public class TrendingDialogFragment extends DialogFragment {
                 .error(R.drawable.ic_broken_image_black_200dp)
                 .fallback(R.drawable.ic_image_black_200dp)
                 .into(imgTrendingPic);
+
+        // Handle click event for Subscribe 'button'
+        imgSubscribe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseMessaging.getInstance().subscribeToTopic("");
+            }
+        });
 
         // Handle click event for OK 'button'
         txtActionOK.setOnClickListener(new View.OnClickListener() {

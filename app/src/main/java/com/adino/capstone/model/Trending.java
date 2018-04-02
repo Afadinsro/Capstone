@@ -8,6 +8,7 @@ public class Trending {
     private String title;
     private String details;
     private String imageURL;
+    private String topic;
     private boolean status;
 
     /**
@@ -17,11 +18,12 @@ public class Trending {
     public Trending() {
     }
 
-    public Trending(String title, String details, String imageURL, boolean status) {
+    public Trending(String title, String details, String imageURL, String topic, boolean status) {
         setTitle(title);
         setDetails(details);
         setImageURL(imageURL);
         setStatus(status);
+        setTopic(topic);
     }
 
     public String getTitle() {
@@ -54,5 +56,13 @@ public class Trending {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 }
