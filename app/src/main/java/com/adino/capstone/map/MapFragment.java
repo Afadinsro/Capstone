@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
@@ -135,8 +136,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
         context = getActivity().getApplicationContext();
 
-
-
         /*
         Location permissions
          */
@@ -173,10 +172,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onStart() {
         super.onStart();
-        isGPSOn = Util.isGPSOn(context);
-        if(!isGPSOn){
-            Util.promptGPSOff(getActivity());
-        }
+//        isGPSOn = Util.isGPSOn(context);
+//        if(!isGPSOn){
+//            Util.promptGPSOff(getActivity());
+//        }
     }
 
     @Override
@@ -201,10 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private void initSearchBar() {
         Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
         // Initialize GeoDataClient
-        geoDataClient = Places.getGeoDataClient(context, null);
-
-
-
+        geoDataClient = Places.getGeoDataClient(getActivity(), null);
 
         // Initialize Places autocomplete adapter
         placeAutocompleteAdapter = new PlaceAutocompleteAdapter(getContext(), geoDataClient,
@@ -229,7 +225,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onViewCreated: View created.");
         super.onViewCreated(view, savedInstanceState);
         if(locationPermissionGranted) {
@@ -251,6 +247,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         super.onAttach(context);
         this.context = context;
         isGPSOn = Util.isGPSOn(context);
+        if(!isGPSOn){
+            Util.promptGPSOff(getActivity());
+        }
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -264,15 +263,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case REQUEST_GPS_ENABLE:
-                isGPSOn = Util.isGPSOn(context);
-                if(isGPSOn){
-                    // Get device location
-                    getDeviceLocation();
-                }else{
-                    // Location was not turned on
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
+                if(resultCode == RESULT_OK){
+                    isGPSOn = Util.isGPSOn(context);
+                    if(isGPSOn) {
+                        // Get device location
+                        getDeviceLocation();
+                    }else{
+                        // Location was not turned on
+                        FragmentManager fragmentManager = getFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
+                    }
                 }
                 break;
         }

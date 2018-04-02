@@ -247,9 +247,9 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }
         }else if(requestCode == REQUEST_GPS_ENABLE){
             FragmentManager fragmentManager = getSupportFragmentManager();
-//            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-//            fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
+            fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
         }
     }
 
