@@ -1,8 +1,11 @@
 package com.adino.capstone.trending;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,14 +18,17 @@ import com.adino.capstone.R;
 import com.adino.capstone.glide.GlideApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import static com.adino.capstone.util.Constants.DIALOG_DETAILS;
+import static com.adino.capstone.util.Constants.DIALOG_IMAGE_URL;
+import static com.adino.capstone.util.Constants.DIALOG_TITLE;
+import static com.adino.capstone.util.Constants.DIALOG_TOPIC;
+
 /**
  * Created by afadinsro on 3/23/18.
  */
 
 public class TrendingDialogFragment extends DialogFragment {
-    private static final String DIALOG_TITLE = "Title";
-    private static final String DIALOG_DETAILS = "Details";
-    private static final String DIALOG_IMAGE_URL = "Image";
+
     private static final String TAG = "TrendingDialogFragment";
 
     private ImageView imgTrendingPic;
@@ -30,11 +36,12 @@ public class TrendingDialogFragment extends DialogFragment {
     private TextView txtDetails;
     private TextView txtTitle;
     private TextView txtActionOK;
+    private String topic;
 
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_trending, container, false);
         txtDetails = (TextView) view.findViewById(R.id.txt_dialog_trending_details);
         txtTitle = (TextView) view.findViewById(R.id.txt_dialog_trending_title);
@@ -46,6 +53,7 @@ public class TrendingDialogFragment extends DialogFragment {
         txtTitle.setText(getArguments().getString(DIALOG_TITLE));
         txtDetails.setText(getArguments().getString(DIALOG_DETAILS));
         txtDetails.setMovementMethod(new ScrollingMovementMethod());
+        topic = getArguments().getString(DIALOG_TOPIC);
         GlideApp.with(getContext())
                 .load(getArguments().getString(DIALOG_IMAGE_URL))
                 .placeholder(R.drawable.ic_sync_black_200dp)
@@ -57,7 +65,8 @@ public class TrendingDialogFragment extends DialogFragment {
         imgSubscribe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FirebaseMessaging.getInstance().subscribeToTopic("");
+                imgSubscribe.setColorFilter(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark), PorterDuff.Mode.SRC_IN);
+                FirebaseMessaging.getInstance().subscribeToTopic(topic);
             }
         });
 
@@ -72,11 +81,12 @@ public class TrendingDialogFragment extends DialogFragment {
         return view;
     }
 
-    public static TrendingDialogFragment newInstance(String title, String details, String url){
+    public static TrendingDialogFragment newInstance(String title, String details, String url, String topic){
         TrendingDialogFragment dialogFragment = new TrendingDialogFragment();
         Bundle args = new Bundle();
         args.putString(DIALOG_TITLE, title);
         args.putString(DIALOG_DETAILS, details);
+        args.putString(DIALOG_TOPIC, topic);
         args.putString(DIALOG_IMAGE_URL, url);
         dialogFragment.setArguments(args);
         return dialogFragment;

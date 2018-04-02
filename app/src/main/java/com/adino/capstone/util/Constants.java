@@ -47,6 +47,7 @@ public final class Constants {
     public static final String REPORT_FIELD_IMAGEURL = "imageURL";
     public static final String REPORT_FIELD_LOCATION = "location";
     public static final String REPORT_FIELD_VIDEOURL = "videoURL";
+    public static final String REPORT_FIELD_TOPIC = "topic";
 
     /*
     Databse References
@@ -66,4 +67,14 @@ public final class Constants {
     public static final LatLngBounds WORLD_LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168),
             new LatLng(71, 136));
+
+    /*
+    Trending Dialog Tags
+     */
+    public static final String DIALOG_TITLE = "Title";
+    public static final String DIALOG_DETAILS = "Details";
+    public static final String DIALOG_IMAGE_URL = "Image";
+    public static final String DIALOG_TAG = "Trending Dialog";
+    public static final String DIALOG_TOPIC = "Default";
+
 }

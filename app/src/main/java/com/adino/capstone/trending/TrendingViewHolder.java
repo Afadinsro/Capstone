@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import static com.adino.capstone.util.Constants.DIALOG_TAG;
 import static com.adino.capstone.util.Constants.TRENDING;
 
 /**
@@ -30,7 +31,7 @@ import static com.adino.capstone.util.Constants.TRENDING;
  */
 
 public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private static final String DIALOG_TAG = "Trending Dialog";
+
     private Context context;
     private ImageView imgTrendingPic;
     private TextView txtTitle;
@@ -105,7 +106,8 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
         Log.d(TAG, "onClick: Item " + getAdapterPosition());
         Log.d(TAG, "onClick: Size " + models.size());
         Trending model = this.models.get(getAdapterPosition());
-        TrendingDialogFragment.newInstance(model.getTitle(), model.getDetails(), model.getImageURL())
+        TrendingDialogFragment.newInstance(model.getTitle(), model.getDetails(), model.getImageURL(),
+                model.getTopic())
                 .show(fragmentManager, DIALOG_TAG);
     }
 
