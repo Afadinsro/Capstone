@@ -34,6 +34,7 @@ public class MessagingService extends FirebaseMessagingService {
         }
 
         if(remoteMessage.getNotification() != null){
+            // Default notification title is app name
             String title = getString(R.string.app_name);
             String message = "Message";
             try {
@@ -42,7 +43,7 @@ public class MessagingService extends FirebaseMessagingService {
             }catch (NullPointerException e){
                 Log.d(TAG, "onMessageReceived: ");
             }
-
+            // Send the notification to the user
             sendNotification(title, message);
         }
     }
