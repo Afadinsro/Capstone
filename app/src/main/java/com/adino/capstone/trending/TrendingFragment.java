@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.adino.capstone.R;
 import com.adino.capstone.model.Trending;
+import com.adino.capstone.model.User;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.ChildEventListener;
@@ -26,6 +27,8 @@ import com.google.firebase.database.Query;
 
 import static com.adino.capstone.util.Constants.GRID_COLUMN_COUNT;
 import static com.adino.capstone.util.Constants.TRENDING;
+import static com.adino.capstone.util.Constants.USER_ID;
+import static com.adino.capstone.util.Constants.USER_SUBSCRIPTIONS;
 
 
 /**
@@ -37,10 +40,6 @@ import static com.adino.capstone.util.Constants.TRENDING;
  * create an instance of this fragment.
  */
 public class TrendingFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "TrendingFragment";
 
     private RecyclerView rvTrending;
@@ -51,8 +50,8 @@ public class TrendingFragment extends Fragment {
     private DatabaseReference databaseReference;
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String userID;
+    private String subscriptions;
 
     private OnFragmentInteractionListener mListener;
 
@@ -64,16 +63,16 @@ public class TrendingFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param uid User ID.
+     * @param subscriptions User subscriptions.
      * @return A new instance of fragment TrendingFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static TrendingFragment newInstance(String param1, String param2) {
+    public static TrendingFragment newInstance(String uid, String subscriptions) {
         TrendingFragment fragment = new TrendingFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(USER_ID, uid);
+        args.putString(USER_SUBSCRIPTIONS, subscriptions);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,8 +81,8 @@ public class TrendingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            userID = getArguments().getString(USER_ID);
+            subscriptions = getArguments().getString(USER_SUBSCRIPTIONS);
         }
     }
 
@@ -117,7 +116,9 @@ public class TrendingFragment extends Fragment {
             public TrendingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 Log.d(TAG, "onCreateViewHolder: ViewHolder created");
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending, parent, false);
-                return new TrendingViewHolder(getContext(), view, getFragmentManager());
+                Log.d(TAG, "onCreateViewHolder: Subscriptions: " + subscriptions);
+                return new TrendingViewHolder(getContext(), view, getFragmentManager(),
+                        new User(userID, subscriptions));
             }
         };
         Log.d(TAG, "onCreateView: Adapter created");

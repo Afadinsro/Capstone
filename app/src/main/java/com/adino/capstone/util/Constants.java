@@ -48,12 +48,14 @@ public final class Constants {
     public static final String REPORT_FIELD_LOCATION = "location";
     public static final String REPORT_FIELD_VIDEOURL = "videoURL";
     public static final String REPORT_FIELD_TOPIC = "topic";
+    public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
 
     /*
     Databse References
      */
     public static final String REPORTS = "reports";
     public static final String TRENDING = "trending";
+    public static final String USERS = "users";
 
     /*
     Grid Layout
@@ -76,5 +78,11 @@ public final class Constants {
     public static final String DIALOG_IMAGE_URL = "Image";
     public static final String DIALOG_TAG = "Trending Dialog";
     public static final String DIALOG_TOPIC = "Default";
+    public static final String DIALOG_USER_SUBSCRIPTIONS = "Subscriptions";
 
+    /*
+    User Fields
+     */
+    public static final String USER_ID = "userID";
+    public static final String USER_SUBSCRIPTIONS = "subscriptions";
 }

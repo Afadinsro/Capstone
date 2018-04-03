@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.adino.capstone.capture.DetailsActivity;
 import com.adino.capstone.contacts.ContactsFragment;
 import com.adino.capstone.map.MapFragment;
+import com.adino.capstone.model.User;
 import com.adino.capstone.reports.ReportsFragment;
 import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
@@ -31,12 +32,18 @@ import com.adino.capstone.util.Permissions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
@@ -49,6 +56,8 @@ import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
+import static com.adino.capstone.util.Constants.USERS;
+import static com.adino.capstone.util.Constants.USER_FIELD_SUBSCRIPTIONS;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
@@ -66,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
+    private String userID = "";
+    private String userTopics = "";
+    private ArrayList<String> subscriptions = new ArrayList<>();
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -89,7 +102,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     return true;
                 case R.id.navigation_trending:
                     toggleCaptureButtons(View.GONE);
-                    fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+                    fragmentTransaction.replace(R.id.content, TrendingFragment.newInstance(userID,
+                            userTopics)).commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
                     return true;
@@ -168,8 +182,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                                     Use Collections.singletonList() for single provider
                                      */
                                     Arrays.asList(
-                                            new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
+                                            new AuthUI.IdpConfig.PhoneBuilder()
+                                                    .setDefaultCountryIso("gh")
+                                                    .build(),
+                                            new AuthUI.IdpConfig.GoogleBuilder().build()
                                     )
                             ).build(),
                             REQUEST_SIGN_IN
@@ -180,6 +196,34 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
             init();
+            userID = firebaseAuth.getCurrentUser().getUid();
+            databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
+                    .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
+
+            databaseReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    try {
+                        if (dataSnapshot.getValue() != null) {
+                            try {
+                                userTopics = dataSnapshot.getValue(String.class);
+                                Log.d(TAG, "onDataChange: topics: " + userTopics);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            Log.e("TAG", " it's null.");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
 
     }
@@ -238,11 +282,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             if(resultCode == RESULT_OK){
                 signedIn = true;
                 init();
-                Snackbar.make(navigation, "You are signed in!", Snackbar.LENGTH_SHORT);
+                Snackbar.make(fab_capture_picture, "You are signed in!", Snackbar.LENGTH_SHORT);
                 Toast.makeText(this, "You are signed in!", Toast.LENGTH_SHORT).show();
             }else if (resultCode == RESULT_CANCELED){
                 signedIn = false;
-                Toast.makeText(MainActivity.this,"Sign in cancelled!", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }else if(requestCode == REQUEST_GPS_ENABLE){
@@ -408,10 +451,12 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             // Check to make sure its from DetailsActivity
             if (detailsToReports) {
                 navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
-                fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey, path)).commitAllowingStateLoss();
+                fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey,
+                        path)).commitAllowingStateLoss();
             } else {
                 navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+                fragmentTransaction.replace(R.id.content, TrendingFragment.newInstance(userID,
+                        userTopics)).commitAllowingStateLoss();
             }
         } else {
             // No extras in calling intent

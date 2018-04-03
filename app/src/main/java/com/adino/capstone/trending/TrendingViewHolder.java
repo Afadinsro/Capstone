@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.adino.capstone.R;
 import com.adino.capstone.glide.GlideApp;
 import com.adino.capstone.model.Trending;
+import com.adino.capstone.model.User;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -38,13 +39,15 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
     private TextView txtDescription;
     private FragmentManager fragmentManager;
     private ArrayList<Trending> models;
+    private User user;
 
     private static final String TAG = "TrendingViewHolder";
 
-     TrendingViewHolder(final Context context, View itemView, FragmentManager fragmentManager) {
+     TrendingViewHolder(final Context context, View itemView, FragmentManager fragmentManager, User user) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
+        this.user = user;
         CardView cardView = (CardView)itemView.findViewById(R.id.item_cv_trending);
         txtDescription = (TextView)itemView.findViewById(R.id.txt_trending_details);
         txtTitle = (TextView)itemView.findViewById(R.id.txt_trending_title);
@@ -107,7 +110,7 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
         Log.d(TAG, "onClick: Size " + models.size());
         Trending model = this.models.get(getAdapterPosition());
         TrendingDialogFragment.newInstance(model.getTitle(), model.getDetails(), model.getImageURL(),
-                model.getTopic())
+                model.getTopic(), user.getSubscriptions())
                 .show(fragmentManager, DIALOG_TAG);
     }
 
