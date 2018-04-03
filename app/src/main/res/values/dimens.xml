@@ -2,8 +2,48 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-
     <dimen name="tbtn_size">40dp</dimen>
-    <dimen name="txt_size">16sp</dimen>
     <dimen name="img_report_pic">200dp</dimen>
+    <dimen name="item_report_height">150dp</dimen>
+    <dimen name="img_report_pic_width">118dp</dimen>
+    <dimen name="rl_report_top_bottom_margins">16dp</dimen>
+    <dimen name="rl_report_side_margins">16dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
+    <dimen name="img_report_icon_size">24dp</dimen>
+    <dimen name="img_status_icon_size">24dp</dimen>
+    <dimen name="item_trending_height">300dp</dimen>
+
+    <!-- Default padding or margin sizes for Material Design -->
+    <dimen name="material_2">2dp</dimen>
+    <dimen name="material_4">4dp</dimen>
+    <dimen name="material_8">8dp</dimen>
+    <dimen name="material_16">16dp</dimen>
+    <dimen name="material_24">24dp</dimen>
+    <dimen name="material_32">32dp</dimen>
+    <dimen name="material_40">40dp</dimen>
+    <dimen name="material_48">48dp</dimen>
+    <dimen name="material_56">56dp</dimen>
+    <dimen name="material_64">64dp</dimen>
+    <dimen name="material_72">72dp</dimen>
+    <dimen name="material_80">80dp</dimen>
+    <dimen name="material_88">88dp</dimen>
+    <dimen name="material_96">96dp</dimen>
+    <dimen name="material_150">150dp</dimen>
+    <dimen name="material_100">100dp</dimen>
+    <dimen name="material_200">200dp</dimen>
+    <dimen name="material_300">300dp</dimen>
+    <dimen name="material_400">400dp</dimen>
+    <dimen name="material_500">500dp</dimen>
+
+    <!-- Text sizes -->
+    <dimen name="txt_size_12">12sp</dimen>
+    <dimen name="txt_size_14">14sp</dimen>
+    <dimen name="txt_size_16">16sp</dimen>
+    <dimen name="txt_size_18">18sp</dimen>
+    <dimen name="txt_size_20">20sp</dimen>
+    <dimen name="txt_size_24">24sp</dimen>
+    <dimen name="txt_size_22">22sp</dimen>
+
+
+
 </resources>

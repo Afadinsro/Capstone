@@ -1,4 +1,4 @@
-package com.adino.capstone;
+package com.adino.capstone.util;
 
 /**
  * Created by afadinsro on 2/16/18.
@@ -11,6 +11,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.util.Log;
 import java.lang.reflect.Field;
 
+// TODO cite source
 public class BottomNavigationViewHelper {
     @SuppressLint("RestrictedApi")
     public static void disableShiftMode(BottomNavigationView view) {

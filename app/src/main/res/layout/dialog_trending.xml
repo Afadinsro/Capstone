@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/rl_dialog_trending"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/material_400"
+    android:scrollbarSize="@dimen/material_4"
+    android:scrollbars="vertical"
+    android:padding="@dimen/material_16">
+
+    <ImageView
+        android:id="@+id/dialog_img_trending_pic"
+        android:layout_width="@dimen/material_200"
+        android:layout_height="@dimen/material_200"
+        app:srcCompat="@drawable/ic_image_black_200dp"
+        android:contentDescription="@string/default_content_description"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/material_16"
+        android:scaleType="center" />
+
+    <TextView
+        android:id="@+id/txt_dialog_trending_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/dialog_img_trending_pic"
+        android:gravity="fill_horizontal"
+        android:text="@string/default_text"
+        android:textSize="@dimen/txt_size_24"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="@dimen/material_8"/>
+
+    <TextView
+        android:id="@+id/txt_dialog_trending_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_dialog_trending_title"
+        android:gravity="fill_horizontal"
+        android:text="@string/default_text"
+        android:textSize="@dimen/txt_size_16"
+        android:scrollbars="vertical"
+        android:scrollbarSize="@dimen/material_2"
+        android:minHeight="@dimen/material_100"
+        android:maxHeight="@dimen/material_200"
+        />
+
+    <TextView
+        android:id="@+id/txt_dialog_trending_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:text="@android:string/ok"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/txt_dialog_trending_details"
+        android:paddingEnd="@dimen/material_24"
+        android:paddingStart="@dimen/material_24"
+        android:paddingTop="@dimen/material_24"
+        android:textSize="@dimen/txt_size_20" />
+
+    <ImageView
+        android:id="@+id/img_subscribe"
+        android:layout_width="@dimen/material_72"
+        android:layout_height="@dimen/material_48"
+        app:srcCompat="@drawable/ic_notifications_off_black_24dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/txt_dialog_trending_details"
+        android:paddingTop="@dimen/material_24"
+        android:paddingEnd="@dimen/material_24"
+        android:layout_alignBottom="@id/txt_dialog_trending_ok"
+        android:layout_alignTop="@id/txt_dialog_trending_ok"
+        android:tint="@color/grey"
+        android:paddingStart="@dimen/material_24"/>
+
+</RelativeLayout>

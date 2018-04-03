@@ -32,13 +32,15 @@
     <!--CONTENT DESCRIPTIONS-->
     <string name="capture_content_description_img_view">Gallery</string>
 
-    <!-- Text fields Texts -->
+    <!-- TEXT FIELD TEXTS -->
     <string name="txt_caption_placeholder">Write a caption&#8230;</string>
     <string name="txt_location_placeholder">Location in words&#8230;</string>
     <string name="txt_other_placeholder">Category&#8230;</string>
     <string name="txt_date_placeholder">dd-MM-yyyy</string>
+    <string name="caption_placeholder">Caption</string>
+    <string name="category_placeholder">Category</string>
 
-    <!-- Labels -->
+    <!-- LABELS -->
     <string name="lbl_caption">Caption:</string>
     <string name="lbl_category">Category:</string>
     <string name="lbl_default">Label:</string>
@@ -48,12 +50,24 @@
     <!-- BUTTON TEXTS -->
     <string name="btn_submit">Submit</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_trending_fragment">Hello Trending fragment</string>
-    <string name="hello_contacts_fragment">Hello Contacts fragment</string>
-    <string name="hello_map_fragment">Hello Map fragment</string>
-    <string name="hello_reports_fragment">Hello Reports fragment</string>
+    <!-- CONTENT DESCRIPTIONS -->
+    <string name="default_content_description">Content details</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_contacts_fragment">Hello Contacts fragment</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="report_img_content_description">Reports image content details</string>
+
+    <string name="default_text">Text</string>
+
+    <!-- MAP FRAGMENT -->
+    <string name="map_search_hint">Enter Address or City&#8230;</string>
+
+    <!-- MORE MENU -->
+    <string name="sign_out">Sign out</string>
+    <string name="profile">Profile</string>
+
+    <!-- NOTIFICATIONS -->
+    <string name="default_notification_channel_id">1234</string>
 </resources>

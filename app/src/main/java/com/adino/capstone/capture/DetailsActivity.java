@@ -15,12 +15,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -33,6 +32,13 @@ import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.model.DisasterCategory;
 import com.adino.capstone.model.Report;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -54,8 +60,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class DetailsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
+import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
+import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
+
+public class DetailsActivity extends AppCompatActivity
+        implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     //TODO: Add autofill for entering location in words.
 
@@ -85,7 +96,8 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private StorageReference mPhotosStorageReference;
     private UploadTask uploadTask;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference messagesDatabaseReference;
+    private DatabaseReference reportsDatabaseReference;
+    FirebaseJobDispatcher jobDispatcher;
 
     /**
      * Text Fields
@@ -93,6 +105,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private EditText txtCaption;
     private EditText txtOtherCategory;
     private EditText txtLocation;
+    private AutoCompleteTextView txtAutoLocation;
     private TextView txtDate;
 
     /**
@@ -117,7 +130,9 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
     private ImageView imgReportPic;
     private byte[] photo;
+    private File imageFile;
     private String mCurrentPhotoPath;
+    private String key;
 
 
     @Override
@@ -130,6 +145,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         //InputMethodManager
         final InputMethodManager inputMethodManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
+        //firebaseDatabase.setPersistenceEnabled(true); // Enable offline storage
 
         //Initialize Toggle buttons
         tbtnEarthquake = (ToggleButton)findViewById(R.id.tbtn_earthquake);
@@ -166,14 +182,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         mFirebaseStorage = FirebaseStorage.getInstance();
         mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
         firebaseDatabase = FirebaseDatabase.getInstance();
-        messagesDatabaseReference = firebaseDatabase.getReference().child("reports");
+
+        reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
 
         // Display captured image
         imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
-        photo = getIntent().getByteArrayExtra("image");
+        photo = getIntent().getByteArrayExtra(IMAGE_BYTE_ARRAY);
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
 
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
         setOnClickListenerFAB(inputMethodManager);
     }
 
@@ -232,12 +250,100 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                             }).show();
                 }else {
                     // All fields validated
+                    Log.d(TAG, "onClick: All fields validated");
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
-                    uploadImage();
-                }
 
+                    Intent callingIntent = getIntent();
+                    String path = "";
+                    if(callingIntent.getExtras() != null){
+                        path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
+                        assert path != null;
+                        imageFile = new File(path);
+                    }
+                    String pushKey = uploadReport();
+
+                    // TODO upload image in background
+                    // Create a new dispatcher using the Google Play driver.
+                    Bundle jobParameters = new Bundle();
+                    /*
+                    Add Job parameters
+                    1. PUSHED_REPORT_KEY - the key generated using the push() method. This will be
+                    used to update the imageURL of the report when image is successfully uploaded online
+                    2. IMAGE_FILE_ABS_PATH - Absolute path of the image stored on disk
+                     */
+                    jobParameters.putString(PUSHED_REPORT_KEY, pushKey);
+                    jobParameters.putString(IMAGE_FILE_ABS_PATH, path);
+                    Job uploadJob = createUploadMediaJob(jobDispatcher, jobParameters);
+
+
+                    jobDispatcher.mustSchedule(uploadJob);
+                    Log.d(TAG, "onClick: Job scheduled");
+                    //uploadImage();
+
+                    // TODO navigate to reports immediately with the image file and a pending status
+                    Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
+                    backToReportsIntent.putExtra("detailsToReports", true);
+                    backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
+                    backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, path);
+                    backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(backToReportsIntent);
+                }
             }
         });
+    }
+
+    /**
+     * Upload report to FirebaseDatabase with imageURL as file location on disk
+     * imageURL will be changed immediately file is successfully uploaded to storage in background
+     * @return key for the uploaded report
+     */
+    private String uploadReport() {
+        // Initial image url is the location of the file on disk
+        // This will be changed when the
+        String imageURL = Uri.fromFile(imageFile).toString();
+
+        category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
+                getSelectedCategory(selectedTbtn).toString();
+        date = getCurrentDate();
+        caption = getCaption();
+        location = getLocation();
+        Report report = new Report(caption, date, category, imageURL, location);
+        String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
+        reportsDatabaseReference.child(pushKey).setValue(report);
+        return pushKey;
+    }
+
+    /**
+     * Creates a new job using the FirebaseJobDispatcher and the job parameters given.
+     * @param dispatcher FirebaseJobDispatcher
+     * @param jobParameters Job parameters
+     * @return Job
+     */
+    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
+        Log.d(TAG, "createUploadMediaJob: Creating job...");
+        return dispatcher.newJobBuilder()
+                // the JobService that will be called
+                .setService(UploadMediaService.class)
+                // uniquely identifies the job
+                .setTag(UPLOAD_MEDIA_TAG)
+                // add parameters
+                .setExtras(jobParameters)
+                // one-off job
+                .setRecurring(false)
+                // don't persist past a device reboot
+                .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
+                // start ASAP
+                .setTrigger(Trigger.executionWindow(0,0))
+                // don't overwrite an existing job with the same tag
+                .setReplaceCurrent(false)
+                // retry with linear backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                // constraints that need to be satisfied for the job to run
+                .setConstraints(
+                    // run on any network
+                    Constraint.ON_ANY_NETWORK
+                )
+                .build();
     }
 
     /**
@@ -262,15 +368,6 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         super.onPause();
         //attach child event listener
         removeDatabaseReadListener();
-    }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
     }
 
     /**
@@ -369,7 +466,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      * @return
      */
     private String getLocation(){
-        return "";
+        return txtLocation.getText().toString();
     }
 
     /**
@@ -401,9 +498,10 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(DetailsActivity.this, "Error occurred! Report not sent!", Toast.LENGTH_SHORT).show();
                 }
             };
-            messagesDatabaseReference.addChildEventListener(childEventListener);
+            reportsDatabaseReference.addChildEventListener(childEventListener);
         }
     }
 
@@ -412,7 +510,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
      */
     private void removeDatabaseReadListener(){
         if(childEventListener != null) {
-            messagesDatabaseReference.removeEventListener(childEventListener);
+            reportsDatabaseReference.removeEventListener(childEventListener);
             childEventListener = null;
         }
     }
@@ -565,7 +663,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
             StorageMetadata metadata = new StorageMetadata.Builder()
                     .setContentType("image/jpg")
                     .build();
-            uploadTask = photoRef.putFile(file);
+            //uploadTask = photoRef.putFile(file);
             uploadTask = photoRef.putBytes(photo, metadata);
 
         }catch (IOException e){
@@ -583,12 +681,16 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                         getSelectedCategory(selectedTbtn).toString();
                 date = getCurrentDate();
                 caption = getCaption();
+                location = getLocation();
                 Report report = new Report(caption, date, category, imageURL, location);
 
-                messagesDatabaseReference.push().setValue(report);
-                Intent backToMainIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                backToMainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(backToMainIntent);
+                reportsDatabaseReference.push().setValue(report);
+                // Get push key
+                String key = reportsDatabaseReference.getKey();
+                Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
+                backToReportsIntent.putExtra("detailsToReports", true);
+                backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(backToReportsIntent);
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
