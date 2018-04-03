@@ -19,6 +19,7 @@ import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -64,8 +65,8 @@ import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
 
-public class DetailsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+public class DetailsActivity extends AppCompatActivity
+        implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     //TODO: Add autofill for entering location in words.
 
@@ -104,6 +105,7 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     private EditText txtCaption;
     private EditText txtOtherCategory;
     private EditText txtLocation;
+    private AutoCompleteTextView txtAutoLocation;
     private TextView txtDate;
 
     /**
@@ -286,13 +288,12 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
-
             }
         });
     }
 
     /**
-     * Upload report to FirebaseDatabase with imageURL as filelocation on disk
+     * Upload report to FirebaseDatabase with imageURL as file location on disk
      * imageURL will be changed immediately file is successfully uploaded to storage in background
      * @return key for the uploaded report
      */
@@ -313,10 +314,10 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     /**
-     *
-     * @param dispatcher
-     * @param jobParameters
-     * @return
+     * Creates a new job using the FirebaseJobDispatcher and the job parameters given.
+     * @param dispatcher FirebaseJobDispatcher
+     * @param jobParameters Job parameters
+     * @return Job
      */
     private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
         Log.d(TAG, "createUploadMediaJob: Creating job...");
@@ -367,15 +368,6 @@ public class DetailsActivity extends AppCompatActivity implements OnMapReadyCall
         super.onPause();
         //attach child event listener
         removeDatabaseReadListener();
-    }
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
     }
 
     /**
