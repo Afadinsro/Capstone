@@ -153,8 +153,6 @@ public class TrendingDialogFragment extends DialogFragment {
             Log.d(TAG, "onCreateView: Content before check: " + subscription);
         }
 
-
-
         // Handle click event for Subscribe 'button'
         imgSubscribe.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -234,7 +232,7 @@ public class TrendingDialogFragment extends DialogFragment {
         int size = subscriptions.size();
         for (String s : subscriptions) {
             stringBuilder.append(s);
-            if(size > 1) {
+            if(size > 1 && s.length() > 1) {
                 // Don't append ';' after last subscription
                 stringBuilder.append(";");
             }
@@ -249,25 +247,6 @@ public class TrendingDialogFragment extends DialogFragment {
         Log.d(TAG, "updateSubscriptions: " + subscriptionString);
         reference.setValue(subscriptionString);
     }
-
-    /*
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Activity activity = getActivity();
-        return new AlertDialog.Builder(activity)
-                .setTitle(getArguments().getString(DIALOG_TITLE))
-                .setMessage(getArguments().getString(DIALOG_DETAILS))
-                .setIcon(R.drawable.ic_image_black_24dp)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getDialog().dismiss();
-                    }
-                })
-                .create();
-    }
-    */
 
     @Override
     public void onAttach(Context context) {
