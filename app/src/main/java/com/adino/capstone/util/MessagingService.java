@@ -16,6 +16,7 @@ import com.adino.capstone.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import static com.adino.capstone.util.Constants.NOTIFICATION_ID;
 import static com.adino.capstone.util.Constants.REQUEST_PENDING_INTENT;
 
 public class MessagingService extends FirebaseMessagingService {
@@ -90,7 +91,7 @@ public class MessagingService extends FirebaseMessagingService {
             }
         }
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
 }

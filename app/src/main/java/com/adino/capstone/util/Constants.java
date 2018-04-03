@@ -85,4 +85,9 @@ public final class Constants {
      */
     public static final String USER_ID = "userID";
     public static final String USER_SUBSCRIPTIONS = "subscriptions";
+
+    /*
+    Notifications
+     */
+    public static final int NOTIFICATION_ID = 4989;
 }
