@@ -72,7 +72,9 @@ import java.util.Locale;
 
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PHOTOS;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
+import static com.adino.capstone.util.Constants.REPORTS;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
@@ -157,6 +159,7 @@ public class DetailsActivity extends AppCompatActivity
     private boolean isGPSOn = false;
     private boolean locationPermissionGranted = false;
     private LatLng latLng;
+    private String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
 
     @Override
@@ -192,10 +195,10 @@ public class DetailsActivity extends AppCompatActivity
         initViews();
 
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
+        mPhotosStorageReference = mFirebaseStorage.getReference().child(PHOTOS);
         firebaseDatabase = FirebaseDatabase.getInstance();
-        reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
-        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+        reportsDatabaseReference = firebaseDatabase.getReference().child(REPORTS);
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getBaseContext()));
 
     }
 
@@ -350,7 +353,6 @@ public class DetailsActivity extends AppCompatActivity
         // This will be changed when the
         String imageURL = Uri.fromFile(imageFile).toString();
 
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
                 getSelectedCategory(selectedTbtn).toString();
         date = getCurrentDate();
@@ -359,10 +361,10 @@ public class DetailsActivity extends AppCompatActivity
         LatLng gps = Util.getDeviceLocation(this);
         Report report = new Report(caption, date, category, imageURL, location, gps.longitude, gps.latitude);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
-        reportsDatabaseReference.child(uid).child(pushKey).setValue(report);
-
+        reportsDatabaseReference.child(userID).child(pushKey).setValue(report);
         return pushKey;
     }
+
 
     /**
      * Creates a new job using the FirebaseJobDispatcher and the job parameters given.

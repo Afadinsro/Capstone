@@ -47,7 +47,8 @@ public class Report {
      * @param longitude longitude
      * @param latitude latitude
      */
-    public Report(String caption, String date, String category, String imageURL, String location, double longitude, double latitude) {
+    public Report(String caption, String date, String category, String imageURL, String location,
+                  double longitude, double latitude) {
         setCaption(caption);
         setCategory(category);
         setDate(date);

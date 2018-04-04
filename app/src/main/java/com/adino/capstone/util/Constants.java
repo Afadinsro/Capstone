@@ -51,7 +51,12 @@ public final class Constants {
     public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
 
     /*
-    Databse References
+    DatabaStoragese References
+     */
+    public static final String PHOTOS = "photos";
+
+    /*
+    Database References
      */
     public static final String REPORTS = "reports";
     public static final String TRENDING = "trending";
