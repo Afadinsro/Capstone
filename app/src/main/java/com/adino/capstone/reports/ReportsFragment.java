@@ -3,6 +3,7 @@ package com.adino.capstone.reports;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import com.adino.capstone.model.Report;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -56,6 +58,7 @@ public class ReportsFragment extends Fragment {
     private String path;
     private static final String TAG = "ReportsFragment";
     private RecyclerView rv_reports;
+    private Context context;
 
     /**
      * Firebase
@@ -97,10 +100,11 @@ public class ReportsFragment extends Fragment {
             key = getArguments().getString(PUSHED_REPORT_KEY);
             path = getArguments().getString(IMAGE_FILE_ABS_PATH);
         }
+        context = getContext();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_reports, container, false);
@@ -110,7 +114,8 @@ public class ReportsFragment extends Fragment {
         /*
          * Firebase
          */
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(REPORTS);
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        databaseReference = FirebaseDatabase.getInstance().getReference().child(REPORTS).child(uid);
         databaseReference.keepSynced(true);
         
         Query query = databaseReference.limitToLast(100);
@@ -121,8 +126,9 @@ public class ReportsFragment extends Fragment {
         //Use FirebaseRecyclerAdapter
         adapter = new FirebaseRecyclerAdapter<Report, ReportViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(ReportViewHolder holder, int position, Report model) {
+            protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull Report model) {
                 holder.bindViewHolder(model);
+
             }
 
             @Override
@@ -132,7 +138,7 @@ public class ReportsFragment extends Fragment {
             }
         };
         rv_reports.setAdapter(adapter);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context, LinearLayoutManager.VERTICAL);
         rv_reports.addItemDecoration(dividerItemDecoration);
 
         return view;
@@ -191,6 +197,7 @@ public class ReportsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        this.context = context;
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {

@@ -51,6 +51,7 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -349,14 +350,17 @@ public class DetailsActivity extends AppCompatActivity
         // This will be changed when the
         String imageURL = Uri.fromFile(imageFile).toString();
 
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
                 getSelectedCategory(selectedTbtn).toString();
         date = getCurrentDate();
         caption = getCaption();
         location = getLocationInWords();
-        Report report = new Report(caption, date, category, imageURL, location);
+        LatLng gps = Util.getDeviceLocation(this);
+        Report report = new Report(caption, date, category, imageURL, location, gps.longitude, gps.latitude);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
-        reportsDatabaseReference.child(pushKey).setValue(report);
+        reportsDatabaseReference.child(uid).child(pushKey).setValue(report);
+
         return pushKey;
     }
 

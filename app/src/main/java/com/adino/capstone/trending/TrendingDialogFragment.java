@@ -62,15 +62,13 @@ public class TrendingDialogFragment extends DialogFragment {
     private ValueEventListener subscriptionsValListener;
 
 
-    public static TrendingDialogFragment newInstance(String title, String details, String url, String topic,
-                                                     String userSubscriptions){
+    public static TrendingDialogFragment newInstance(String title, String details, String url, String topic){
         TrendingDialogFragment dialogFragment = new TrendingDialogFragment();
         Bundle args = new Bundle();
         args.putString(DIALOG_TITLE, title);
         args.putString(DIALOG_DETAILS, details);
         args.putString(DIALOG_TOPIC, topic);
-        args.putString(DIALOG_IMAGE_URL, url);
-        args.putString(DIALOG_USER_SUBSCRIPTIONS, userSubscriptions);
+        args.putString(DIALOG_IMAGE_URL, url);;
         dialogFragment.setArguments(args);
         return dialogFragment;
     }

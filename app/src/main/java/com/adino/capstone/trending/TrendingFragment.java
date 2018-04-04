@@ -49,10 +49,6 @@ public class TrendingFragment extends Fragment {
     private FirebaseRecyclerAdapter<Trending, TrendingViewHolder> adapter;
     private DatabaseReference databaseReference;
 
-    // TODO: Rename and change types of parameters
-    private String userID;
-    private String subscriptions;
-
     private OnFragmentInteractionListener mListener;
 
     public TrendingFragment() {
@@ -63,16 +59,12 @@ public class TrendingFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param uid User ID.
-     * @param subscriptions User subscriptions.
      * @return A new instance of fragment TrendingFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static TrendingFragment newInstance(String uid, String subscriptions) {
+    public static TrendingFragment newInstance() {
         TrendingFragment fragment = new TrendingFragment();
         Bundle args = new Bundle();
-        args.putString(USER_ID, uid);
-        args.putString(USER_SUBSCRIPTIONS, subscriptions);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -81,13 +73,12 @@ public class TrendingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            userID = getArguments().getString(USER_ID);
-            subscriptions = getArguments().getString(USER_SUBSCRIPTIONS);
+
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: View about to be created");
         // Inflate the layout for this fragment
@@ -116,9 +107,7 @@ public class TrendingFragment extends Fragment {
             public TrendingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 Log.d(TAG, "onCreateViewHolder: ViewHolder created");
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending, parent, false);
-                Log.d(TAG, "onCreateViewHolder: Subscriptions: " + subscriptions);
-                return new TrendingViewHolder(getContext(), view, getFragmentManager(),
-                        new User(userID, subscriptions));
+                return new TrendingViewHolder(getContext(), view, getFragmentManager());
             }
         };
         Log.d(TAG, "onCreateView: Adapter created");

@@ -39,15 +39,13 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
     private TextView txtDescription;
     private FragmentManager fragmentManager;
     private ArrayList<Trending> models;
-    private User user;
 
     private static final String TAG = "TrendingViewHolder";
 
-     TrendingViewHolder(final Context context, View itemView, FragmentManager fragmentManager, User user) {
+     TrendingViewHolder(final Context context, View itemView, FragmentManager fragmentManager) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
-        this.user = user;
         CardView cardView = (CardView)itemView.findViewById(R.id.item_cv_trending);
         txtDescription = (TextView)itemView.findViewById(R.id.txt_trending_details);
         txtTitle = (TextView)itemView.findViewById(R.id.txt_trending_title);
@@ -110,7 +108,7 @@ public class TrendingViewHolder extends RecyclerView.ViewHolder implements View.
         Log.d(TAG, "onClick: Size " + models.size());
         Trending model = this.models.get(getAdapterPosition());
         TrendingDialogFragment.newInstance(model.getTitle(), model.getDetails(), model.getImageURL(),
-                model.getTopic(), user.getSubscriptions())
+                model.getTopic())
                 .show(fragmentManager, DIALOG_TAG);
     }
 
