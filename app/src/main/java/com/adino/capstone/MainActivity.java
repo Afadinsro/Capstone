@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     break;
                 case R.id.navigation_capture:
                     toggleCaptureButtons(View.GONE);
-                    //navigation.setSelectedItemId(currentNavItem);
+                    navigation.setSelectedItemId(currentNavItem);
                     break;
                 case R.id.navigation_reports:
                 case R.id.navigation_contacts:
@@ -260,20 +260,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 }
                 byte[] byteArray = byteArrayOutputStream.toByteArray(); // Get byte array
 
-                // Save image to File
-                // TODO save image only after submit button is clicked in DetailsActivity
-                File savedImageFile = saveImageToFile(byteArray);
-                // Image successfully saved?
-                if(savedImageFile != null) {
-                    addPicToGallery(savedImageFile);
-                    // Navigate to DetailsActivity to add more details to the report
-                    Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
-                    goToAddDetailsIntent.putExtra(IMAGE_BYTE_ARRAY, byteArray); // Add image byte array as extra to the intent
-                    goToAddDetailsIntent.putExtra(IMAGE_FILE_ABS_PATH, savedImageFile.getAbsolutePath()); // Add absolute path of file
-                    startActivity(goToAddDetailsIntent);
-                }else{
-                    Toast.makeText(this, "Image could not be saved.", Toast.LENGTH_SHORT).show();
-                }
+                // Navigate to DetailsActivity to add more details to the report
+                Intent goToAddDetailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+                goToAddDetailsIntent.putExtra(IMAGE_BYTE_ARRAY, byteArray); // Add image byte array as extra to the intent
+                startActivity(goToAddDetailsIntent);
+
             }else if(resultCode == RESULT_CANCELED){
                 // If capture was cancelled, select the previously selected nav item.
                 navigation.setSelectedItemId(currentNavItem);
@@ -282,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             if (resultCode == RESULT_OK) {
                 // Get Video
             }else if(resultCode == RESULT_CANCELED){
-                navigation.setSelectedItemId(currentNavItem);
+//                navigation.setSelectedItemId(currentNavItem);
             }
         }else if(requestCode == REQUEST_SIGN_IN){
             if(resultCode == RESULT_OK){
@@ -369,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
 
     /**
-     * Adds thegiven image file to the gallery
+     * Adds the given image file to the gallery
      * @param file Image file
      */
     private void addPicToGallery(File file) {
@@ -463,9 +454,9 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         // Navigate based on calling activity
         Intent callingIntent = getIntent();
 
-        boolean detailsToReports = false; // Navigating from details to reports?
+        // Navigating from details to reports?
         if (callingIntent.getExtras() != null) {
-            detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+            boolean detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
             String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
             String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
             // Check to make sure its from DetailsActivity
@@ -480,8 +471,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         } else {
             // No extras in calling intent
             navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-            fragmentTransaction.replace(R.id.content, new TrendingFragment())
-                    .commitAllowingStateLoss();
+            fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
         }
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.

@@ -62,6 +62,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -303,12 +304,9 @@ public class DetailsActivity extends AppCompatActivity
                     Snackbar.make(fabSend, "Sending report...", Snackbar.LENGTH_LONG).show();
 
                     Intent callingIntent = getIntent();
-                    String path = "";
-                    if(callingIntent.getExtras() != null){
-                        path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
-                        assert path != null;
-                        imageFile = new File(path);
-                    }
+
+                    photo = callingIntent.getByteArrayExtra(IMAGE_BYTE_ARRAY);
+                    imageFile = saveImageToFile(photo);
                     String pushKey = uploadReport();
 
                     // TODO upload image in background
@@ -321,7 +319,7 @@ public class DetailsActivity extends AppCompatActivity
                     2. IMAGE_FILE_ABS_PATH - Absolute path of the image stored on disk
                      */
                     jobParameters.putString(PUSHED_REPORT_KEY, pushKey);
-                    jobParameters.putString(IMAGE_FILE_ABS_PATH, path);
+                    jobParameters.putString(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
                     Job uploadJob = createUploadMediaJob(jobDispatcher, jobParameters);
 
 
@@ -333,7 +331,7 @@ public class DetailsActivity extends AppCompatActivity
                     Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
                     backToReportsIntent.putExtra("detailsToReports", true);
                     backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
-                    backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, path);
+                    backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
@@ -677,15 +675,43 @@ public class DetailsActivity extends AppCompatActivity
     }
 
     /**
-     *  Creates an image in Pictures directory of app for saving the captured image
-     * @return A file for the image to be stored in
-     * @throws IOException Throws this exception if creation of the file fails
+     * Saves the given image byte array to file and returns the file
+     * @param bytes A byte array representation of the image to save
+     * @return The file which the image was saved into, null otherwise
+     */
+    private File saveImageToFile(byte[] bytes) {
+        FileOutputStream outputStream = null;
+        File file = null;
+        try {
+            file = createImageFile();
+            outputStream = new FileOutputStream(file);
+            outputStream.write(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream != null){
+                try{
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return file;
+    }
+
+    /**
+     * Creates a file that captured image will be saved in
+     * @return Returns the created file
+     * @throws IOException Throws IO exception if file creation fails
      */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
         String imageFileName = "PHOTO_" + timeStamp;
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
         File image = File.createTempFile(
                 imageFileName,      /* prefix */
                 ".jpg",      /* suffix */
