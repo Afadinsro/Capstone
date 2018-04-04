@@ -114,9 +114,9 @@
         android:layout_alignStart="@id/tbtn_fire"
         android:layout_below="@+id/img_report_pic"
         android:layout_toEndOf="@id/lbl_caption"
-        android:ems="13"
+        android:ems="14"
         android:maxLines="1"
-        android:layout_marginEnd="@dimen/material_8"
+        android:layout_marginEnd="@dimen/material_24"
         android:hint="@string/txt_caption_placeholder"
         android:inputType="textPersonName"
         android:textColorLink="@color/colorPrimary"
@@ -130,7 +130,7 @@
         android:layout_alignBaseline="@+id/txt_report_caption"
         android:layout_alignBottom="@+id/txt_report_caption"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/material_24"
         android:text="@string/lbl_caption"
         android:textColor="@color/black"/>
 
@@ -141,7 +141,7 @@
         android:layout_alignBaseline="@+id/tbtn_fire"
         android:layout_alignBottom="@+id/tbtn_fire"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/material_24"
         android:layout_below="@id/lbl_caption"
         android:text="@string/lbl_category"
         android:textColor="@color/black"/>
@@ -153,7 +153,7 @@
         android:layout_alignBaseline="@+id/txt_report_location_words"
         android:layout_alignBottom="@+id/txt_report_location_words"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/material_24"
         android:layout_below="@id/lbl_category"
         android:layout_toStartOf="@id/tbtn_fire"
         android:text="@string/lbl_location"
@@ -165,8 +165,8 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/radio_other"
         android:layout_below="@+id/radio_other"
-        android:ems="13"
-        android:layout_marginEnd="8dp"
+        android:ems="14"
+        android:layout_marginEnd="@dimen/material_24"
         android:textSize="@dimen/txt_size_16"
         android:maxLines="1"
         android:inputType="textPersonName"
@@ -184,15 +184,15 @@
         android:layout_marginBottom="16dp"/>
 
     <EditText
+        android:id="@+id/txt_other"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/txt_other"
         android:layout_below="@id/tbtn_fire"
         android:layout_toEndOf="@id/radio_other"
         android:layout_alignBaseline="@id/radio_other"
         android:layout_alignBottom="@id/radio_other"
         android:inputType="textPersonName"
-        android:ems="8"
+        android:ems="9"
         android:textSize="@dimen/txt_size_16"
         android:hint="@string/txt_other_placeholder"
         android:enabled="false"/>
