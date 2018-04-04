@@ -90,4 +90,13 @@ public final class Constants {
     Notifications
      */
     public static final int NOTIFICATION_ID = 4989;
+
+    /*
+    Bottom Navigation IDs
+     */
+    public static final int MAP_NAV_ID = 0;
+    public static final int TRENDING_NAV_ID = 1;
+    public static final int CAPTURE_NAV_ID = 2;
+    public static final int REPORTS_NAV_ID = 3;
+    public static final int CONTACTS_NAV_ID = 4;
 }

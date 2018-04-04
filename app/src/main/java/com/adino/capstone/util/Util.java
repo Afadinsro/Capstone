@@ -1,5 +1,6 @@
 package com.adino.capstone.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,7 +34,7 @@ public final class Util {
     private static final String TAG = "Util";
     private static LatLng latLng;
 
-    public static void getDeviceLocation(final Context context){
+    public static LatLng getDeviceLocation(final Context context){
         FusedLocationProviderClient locationProviderClient =
                 LocationServices.getFusedLocationProviderClient(context);
         try{
@@ -64,6 +65,7 @@ public final class Util {
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
         }
 
+        return latLng;
 
     }
 
@@ -98,7 +100,26 @@ public final class Util {
                 .setPositiveButton("Yes, Turn GPS On", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        activity.startActivityForResult(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_GPS_ENABLE);
+                        activity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                }).setNegativeButton("No, Just Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).setIcon(R.drawable.ic_image_black_24dp)
+                .create();
+        GPSOffDialog.show();
+    }
+
+    public static void promptGPSOff(final Activity activity){
+        AlertDialog GPSOffDialog = new AlertDialog.Builder(activity)
+                .setTitle("GPS turned off")
+                .setMessage("GPS is disabled, in order to use the application properly you need to turn on the GPS of your device.\n\nTurn GPS on?")
+                .setPositiveButton("Yes, Turn GPS On", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        activity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
                 }).setNegativeButton("No, Just Exit", new DialogInterface.OnClickListener() {
                     @Override

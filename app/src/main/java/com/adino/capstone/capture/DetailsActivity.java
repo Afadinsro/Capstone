@@ -17,7 +17,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
@@ -30,8 +32,11 @@ import android.widget.ToggleButton;
 
 import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
+import com.adino.capstone.map.PlaceAutocompleteAdapter;
 import com.adino.capstone.model.DisasterCategory;
 import com.adino.capstone.model.Report;
+import com.adino.capstone.util.Permissions;
+import com.adino.capstone.util.Util;
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -39,8 +44,11 @@ import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.ChildEventListener;
@@ -63,10 +71,14 @@ import java.util.Locale;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
+import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
+import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
+import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
 public class DetailsActivity extends AppCompatActivity
-        implements ActivityCompat.OnRequestPermissionsResultCallback {
+        implements ActivityCompat.OnRequestPermissionsResultCallback,
+        GoogleApiClient.OnConnectionFailedListener {
 
     //TODO: Add autofill for entering location in words.
 
@@ -117,6 +129,8 @@ public class DetailsActivity extends AppCompatActivity
     private String imageURL = "";
     private String videoURL = "";
     private String location = "";
+    private double latitude;
+    private double longitude;
 
     /**
      * Buttons
@@ -134,6 +148,14 @@ public class DetailsActivity extends AppCompatActivity
     private String mCurrentPhotoPath;
     private String key;
 
+    private GeoDataClient geoDataClient;
+    private PlaceAutocompleteAdapter adapter;
+
+    private Context context;
+    private boolean isGPSOn = false;
+    private boolean locationPermissionGranted = false;
+    private LatLng latLng;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,11 +163,45 @@ public class DetailsActivity extends AppCompatActivity
         setContentView(R.layout.activity_details);
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getLocationPermission();
+        context = getApplicationContext();
+
+        /*
+        Location permissions
+         */
+        String[] permissions = { Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
+        // Check if location permissions have been granted
+        if(Permissions.checkPermission(context, permissions[0])){
+            if(Permissions.checkPermission(context, permissions[1])){
+                locationPermissionGranted = true;
+            }else {
+                // Ask for location permission if not granted already
+                Log.d(TAG, "onCreate: Requesting for permission");
+                //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+                Permissions.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
+            }
+        }else {
+            // Ask for location permission if not granted already
+            //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
+            Permissions.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
+        }
+
+
+        initViews();
+
+        mFirebaseStorage = FirebaseStorage.getInstance();
+        mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+
+    }
+
+    private void initViews() {
         //InputMethodManager
         final InputMethodManager inputMethodManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
-        //firebaseDatabase.setPersistenceEnabled(true); // Enable offline storage
+
 
         //Initialize Toggle buttons
         tbtnEarthquake = (ToggleButton)findViewById(R.id.tbtn_earthquake);
@@ -169,6 +225,7 @@ public class DetailsActivity extends AppCompatActivity
         });
 
         fabSend = (FloatingActionButton) findViewById(R.id.fab_report_submit);
+        setOnClickListenerFAB(inputMethodManager);
 
         // Display date
         txtDate = (TextView)findViewById(R.id.txt_date);
@@ -177,22 +234,14 @@ public class DetailsActivity extends AppCompatActivity
         txtCaption = (EditText)findViewById(R.id.txt_report_caption);
         txtCaption.setFilters(new InputFilter[]{new InputFilter.LengthFilter(DEFAULT_CAPTION_LENGTH_LIMIT)});
 
-        txtLocation = (EditText)findViewById(R.id.txt_report_location_words);
-
-        mFirebaseStorage = FirebaseStorage.getInstance();
-        mPhotosStorageReference = mFirebaseStorage.getReference().child("photos");
-        firebaseDatabase = FirebaseDatabase.getInstance();
-
-        reportsDatabaseReference = firebaseDatabase.getReference().child("reports");
+        txtAutoLocation = (AutoCompleteTextView)findViewById(R.id.txt_report_location_words);
+        initLocationAutoComplete();
 
         // Display captured image
         imgReportPic = (ImageView) findViewById(R.id.img_report_pic);
         photo = getIntent().getByteArrayExtra(IMAGE_BYTE_ARRAY);
         Bitmap imageBitmap = BitmapFactory.decodeByteArray(photo, 0, photo.length);
         imgReportPic.setImageBitmap(imageBitmap);
-
-        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
-        setOnClickListenerFAB(inputMethodManager);
     }
 
     /**
@@ -235,17 +284,17 @@ public class DetailsActivity extends AppCompatActivity
                                     inputMethodManager.showSoftInput(txtOtherCategory, InputMethodManager.SHOW_IMPLICIT);
                                 }
                             }).show();
-                }else if(txtLocation.getText().toString().isEmpty()){
+                }else if(txtAutoLocation.getText().toString().isEmpty()){
                     // No location in words entered
                     Snackbar.make(fabSend, "Enter location in words for effective response...", Snackbar.LENGTH_LONG)
                             .setAction("OK", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     // Set focus on location field
-                                    txtLocation.setFocusableInTouchMode(true);
-                                    txtLocation.requestFocus();
+                                    txtAutoLocation.setFocusableInTouchMode(true);
+                                    txtAutoLocation.requestFocus();
                                     assert inputMethodManager != null;
-                                    inputMethodManager.showSoftInput(txtLocation, InputMethodManager.SHOW_IMPLICIT);
+                                    inputMethodManager.showSoftInput(txtAutoLocation, InputMethodManager.SHOW_IMPLICIT);
                                 }
                             }).show();
                 }else {
@@ -306,7 +355,7 @@ public class DetailsActivity extends AppCompatActivity
                 getSelectedCategory(selectedTbtn).toString();
         date = getCurrentDate();
         caption = getCaption();
-        location = getLocation();
+        location = getLocationInWords();
         Report report = new Report(caption, date, category, imageURL, location);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
         reportsDatabaseReference.child(pushKey).setValue(report);
@@ -364,11 +413,35 @@ public class DetailsActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        isGPSOn = Util.isGPSOn(context);
+        if(!isGPSOn){
+            Util.promptGPSOff(DetailsActivity.this);
+        }else {
+            // Get device GPS location
+            latLng = Util.getDeviceLocation(context);
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         //attach child event listener
         removeDatabaseReadListener();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
 
     /**
      * Requests for the location permission if it hasn't been granted already
@@ -401,7 +474,7 @@ public class DetailsActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
-            case LOCATION_PERMISSION_REQUEST_CODE:
+            case REQUEST_LOCATION_PERMISSION:
                 if(grantResults.length > 0){
                     for(int g: grantResults) {
                         if (g != PackageManager.PERMISSION_GRANTED) {
@@ -462,11 +535,11 @@ public class DetailsActivity extends AppCompatActivity
     }
 
     /**
-     * Get the current location of the user
-     * @return
+     * Get the current location of the user in words
+     * @return Location in words
      */
-    private String getLocation(){
-        return txtLocation.getText().toString();
+    private String getLocationInWords(){
+        return txtAutoLocation.getText().toString();
     }
 
     /**
@@ -681,7 +754,7 @@ public class DetailsActivity extends AppCompatActivity
                         getSelectedCategory(selectedTbtn).toString();
                 date = getCurrentDate();
                 caption = getCaption();
-                location = getLocation();
+                location = getLocationInWords();
                 Report report = new Report(caption, date, category, imageURL, location);
 
                 reportsDatabaseReference.push().setValue(report);
@@ -705,5 +778,50 @@ public class DetailsActivity extends AppCompatActivity
                         }).show();
             }
         });
+    }
+
+    private void initLocationAutoComplete(){
+
+        // Initialize GeoDataClient
+        geoDataClient = Places.getGeoDataClient(context, null);
+
+        // Initialize Places autocomplete adapter
+        adapter = new PlaceAutocompleteAdapter(context, geoDataClient,
+                WORLD_LAT_LNG_BOUNDS, null);
+        // Set autocomplete edit text view adapter
+        txtAutoLocation.setAdapter(adapter);
+
+        txtAutoLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                Log.d(TAG, "onEditorAction: Called.");
+                if(actionId == EditorInfo.IME_ACTION_SEARCH
+                        || actionId == EditorInfo.IME_ACTION_DONE
+                        || event.getAction() == KeyEvent.ACTION_DOWN
+                        || event.getAction() == KeyEvent.KEYCODE_ENTER){
+
+
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        int errorCode = connectionResult.getErrorCode();
+        if (errorCode == ConnectionResult.API_UNAVAILABLE){
+            Snackbar.make(txtAutoLocation, "Google Places API unavailable. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.NETWORK_ERROR){
+            Snackbar.make(txtAutoLocation, "Network error. Check your internet connection. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.CANCELED){
+            Snackbar.make(txtAutoLocation, "Connection cancelled. Check your internet connection. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }else if (errorCode == ConnectionResult.TIMEOUT){
+            Snackbar.make(txtAutoLocation, "Connection timed out. Check your internet connection and try again. Autocompletion is unavailable.",
+                    Snackbar.LENGTH_SHORT);
+        }
     }
 }

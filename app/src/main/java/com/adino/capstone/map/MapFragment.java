@@ -134,7 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
-        context = getActivity().getApplicationContext();
+        context = getContext();
 
         /*
         Location permissions
@@ -200,7 +200,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private void initSearchBar() {
         Log.d(TAG, "initSearchBar: Setting action listener for search bar...");
         // Initialize GeoDataClient
-        geoDataClient = Places.getGeoDataClient(getActivity(), null);
+        geoDataClient = Places.getGeoDataClient(context, null);
 
         // Initialize Places autocomplete adapter
         placeAutocompleteAdapter = new PlaceAutocompleteAdapter(getContext(), geoDataClient,
@@ -261,22 +261,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
-            case REQUEST_GPS_ENABLE:
-                if(resultCode == RESULT_OK){
-                    isGPSOn = Util.isGPSOn(context);
-                    if(isGPSOn) {
-                        // Get device location
-                        getDeviceLocation();
-                    }else{
-                        // Location was not turned on
-                        FragmentManager fragmentManager = getFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
-                    }
-                }
-                break;
-        }
+
     }
 
     @Override
@@ -319,10 +304,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         LatLng currentLocation;
         if(locationPermissionGranted){
             initSearchBar();
-            getDeviceLocation();
 
-//            currentLocation =  Util.getDeviceLocation(getActivity());
-//            moveCamera(currentLocation, DEFAULT_ZOOM);
+            currentLocation =  Util.getDeviceLocation(getActivity());
+            moveCamera(currentLocation, DEFAULT_ZOOM);
             try {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -385,38 +369,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             dialog.show();
         }
         return false;
-    }
-
-    private void getDeviceLocation(){
-        locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-        try{
-            if(locationPermissionGranted){
-                if(Util.isGPSOn(context)) {
-                    // GPS is on
-                    Log.d(TAG, "getDeviceLocation: GPS is on");
-                    Task location = locationProviderClient.getLastLocation();
-                    location.addOnCompleteListener(new OnCompleteListener() {
-                        @Override
-                        public void onComplete(@NonNull Task task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "onComplete: Found location.");
-                                Location currentLocation = (Location) task.getResult();
-                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                                moveCamera(latLng, DEFAULT_ZOOM);
-                            } else {
-                                Log.d(TAG, "onComplete: Couldn't find location");
-                                Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-                }else{
-                    // GPS is off
-                    Log.d(TAG, "getDeviceLocation: GPS is off");
-                }
-            }
-        }catch (SecurityException e){
-            Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
-        }
     }
 
     private void geoLocate() {

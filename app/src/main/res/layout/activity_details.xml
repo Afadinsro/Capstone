@@ -158,10 +158,9 @@
         android:layout_below="@id/lbl_category"
         android:layout_toStartOf="@id/tbtn_fire"
         android:text="@string/lbl_location"
-        android:labelFor="@id/txt_report_location_words"
         android:textColor="@color/black"/>
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/txt_report_location_words"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private String userID = "";
     private String userTopics = "";
     private ArrayList<String> subscriptions = new ArrayList<>();
+    private String mCurrentPhotoPath;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -96,14 +97,17 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             switch (item.getItemId()) {
                 case R.id.navigation_map:
                     toggleCaptureButtons(View.GONE);
-                    fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
+                    fragmentTransaction.replace(R.id.content, new MapFragment())
+//                            .addToBackStack(MapFragment.class.getName())
+                            .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
                     return true;
                 case R.id.navigation_trending:
                     toggleCaptureButtons(View.GONE);
-                    fragmentTransaction.replace(R.id.content, TrendingFragment.newInstance(userID,
-                            userTopics)).commitAllowingStateLoss();
+                    fragmentTransaction.replace(R.id.content, new TrendingFragment())
+//                            .addToBackStack(TrendingFragment.class.getName())
+                            .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
                     return true;
@@ -114,13 +118,17 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     return true;
                 case R.id.navigation_reports:
                     toggleCaptureButtons(View.GONE);
-                    fragmentTransaction.replace(R.id.content, new ReportsFragment()).commitAllowingStateLoss();
+                    fragmentTransaction.replace(R.id.content, new ReportsFragment())
+//                            .addToBackStack(ReportsFragment.class.getName())
+                            .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
                     return true;
                 case R.id.navigation_contacts:
                     toggleCaptureButtons(View.GONE);
-                    fragmentTransaction.replace(R.id.content, new ContactsFragment()).commitAllowingStateLoss();
+                    fragmentTransaction.replace(R.id.content, new ContactsFragment())
+//                            .addToBackStack(ContactsFragment.class.getName())
+                            .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
                     return true;
@@ -139,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     break;
                 case R.id.navigation_capture:
                     toggleCaptureButtons(View.GONE);
-                    navigation.setSelectedItemId(currentNavItem);
+                    //navigation.setSelectedItemId(currentNavItem);
                     break;
                 case R.id.navigation_reports:
                 case R.id.navigation_contacts:
@@ -148,8 +156,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             }
         }
     };
-
-    private String mCurrentPhotoPath;
 
 
 
@@ -195,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         };
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
-            init();
+//            init();
             userID = firebaseAuth.getCurrentUser().getUid();
             databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
                     .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
@@ -242,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_INTENT) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_OK && data != null) {
                 // Get Image
                 Bundle extras = data.getExtras();
                 // Ensure an image is returned from the capture
@@ -288,11 +294,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 signedIn = false;
                 finish();
             }
-        }else if(requestCode == REQUEST_GPS_ENABLE){
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-            fragmentTransaction.replace(R.id.content, new MapFragment()).commitAllowingStateLoss();
         }
     }
 
@@ -406,23 +407,42 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         if(authStateListener != null) {
             firebaseAuth.removeAuthStateListener(authStateListener);
         }
+        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
     protected void onStart() {
         Log.d(TAG, "onStart: called");
         super.onStart();
-        if(signedIn) {
-            init();
-        }
+//        if(signedIn) {
+//            init();
+//        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
     protected void onRestart() {
         Log.d(TAG, "onRestart: called");
         super.onRestart();
+//        if(signedIn) {
+//            init();
+//            navigation.setSelectedItemId(currentNavItem);
+//        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        firebaseAuth.addAuthStateListener(authStateListener);
         if(signedIn) {
             init();
+
+            //navigation.setSelectedItemId(currentNavItem);
         }
     }
 
@@ -455,15 +475,14 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                         path)).commitAllowingStateLoss();
             } else {
                 navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-                fragmentTransaction.replace(R.id.content, TrendingFragment.newInstance(userID,
-                        userTopics)).commitAllowingStateLoss();
+                fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
             }
         } else {
             // No extras in calling intent
             navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
-            fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
+            fragmentTransaction.replace(R.id.content, new TrendingFragment())
+                    .commitAllowingStateLoss();
         }
-
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
     }
@@ -529,15 +548,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setOnNavigationItemReselectedListener(onNavigationItemReselectedListener);
         BottomNavigationViewHelper.disableShiftMode(navigation);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        firebaseAuth.addAuthStateListener(authStateListener);
-        if(signedIn) {
-            init();
-        }
     }
 
     @Override
