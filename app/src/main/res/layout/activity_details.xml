@@ -18,8 +18,8 @@
         android:background="@drawable/ic_flame"
         android:textOff=""
         android:textOn=""
-        android:layout_marginEnd="48dp"
-        android:layout_marginStart="16dp"/>
+        android:layout_marginEnd="@dimen/material_48"
+        android:layout_marginStart="@dimen/material_16"/>
 
     <ToggleButton
         android:id="@+id/tbtn_flood"
@@ -31,7 +31,7 @@
         android:textOff=""
         android:textOn=""
         android:background="@drawable/ic_flood"
-        android:layout_marginEnd="48dp"/>
+        android:layout_marginEnd="@dimen/material_48"/>
 
     <ToggleButton
         android:id="@+id/tbtn_motor"
@@ -54,8 +54,8 @@
         android:textOff=""
         android:textOn=""
         android:background="@drawable/ic_storm"
-        android:layout_marginEnd="48dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginEnd="@dimen/material_48"
+        android:layout_marginTop="@dimen/material_16"/>
 
     <ToggleButton
         android:id="@+id/tbtn_epidemic"
@@ -67,8 +67,8 @@
         android:textOff=""
         android:textOn=""
         android:background="@drawable/ic_medicines"
-        android:layout_marginEnd="48dp"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginEnd="@dimen/material_48"
+        android:layout_marginTop="@dimen/material_16"/>
 
     <ToggleButton
         android:id="@+id/tbtn_earthquake"
@@ -80,7 +80,7 @@
         android:textOff=""
         android:textOn=""
         android:background="@drawable/ic_earthquake"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="@dimen/material_16"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_report_submit"
@@ -88,7 +88,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/material_16"
         android:clickable="true"
         android:focusable="true"
         android:tint="@color/white"
@@ -99,9 +99,9 @@
 
     <ImageView
         android:id="@+id/img_report_pic"
-        android:layout_width="@dimen/img_report_pic"
-        android:layout_height="@dimen/img_report_pic"
-        android:layout_marginTop="16dp"
+        android:layout_width="@dimen/material_200"
+        android:layout_height="@dimen/material_200"
+        android:layout_marginTop="@dimen/material_16"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:contentDescription="@string/capture_content_description_img_view"
@@ -114,14 +114,14 @@
         android:layout_alignStart="@id/tbtn_fire"
         android:layout_below="@+id/img_report_pic"
         android:layout_toEndOf="@id/lbl_caption"
-        android:ellipsize="start"
-        android:ems="15"
-        android:layout_marginEnd="8dp"
+        android:ems="13"
+        android:maxLines="1"
+        android:layout_marginEnd="@dimen/material_8"
         android:hint="@string/txt_caption_placeholder"
         android:inputType="textPersonName"
         android:textColorLink="@color/colorPrimary"
         android:textSize="@dimen/txt_size_16"
-        android:layout_marginTop="@dimen/activity_vertical_margin"/>
+        android:layout_marginTop="@dimen/material_16"/>
 
     <TextView
         android:id="@+id/lbl_caption"
@@ -131,7 +131,6 @@
         android:layout_alignBottom="@+id/txt_report_caption"
         android:layout_alignParentStart="true"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:labelFor="@id/txt_report_caption"
         android:text="@string/lbl_caption"
         android:textColor="@color/black"/>
 
@@ -166,9 +165,10 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/radio_other"
         android:layout_below="@+id/radio_other"
-        android:ems="15"
+        android:ems="13"
         android:layout_marginEnd="8dp"
         android:textSize="@dimen/txt_size_16"
+        android:maxLines="1"
         android:inputType="textPersonName"
         android:hint="@string/txt_location_placeholder" />
 

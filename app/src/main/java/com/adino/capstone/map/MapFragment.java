@@ -53,6 +53,7 @@ import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
+import static com.adino.capstone.util.Constants.DEFAULT_LATLNG_GBAWE;
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
@@ -94,6 +95,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private GoogleApiClient googleApiClient;
     private GeoDataClient geoDataClient;
     private LocationManager locationManager;
+    private LatLng currentLocation;
 
     private static final String TAG = "MapFragment";
     private boolean isGPSOn = false;
@@ -131,7 +133,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
         // Check if Google services is working
         if(!isGoogleServicesOK()){
-            Toast.makeText(getContext(), "", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please make sure a correct version of Google Play " +
+                    "Services is installed", Toast.LENGTH_SHORT).show();
             getActivity().finish();
         }
         context = getContext();
@@ -156,6 +159,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
             requestPermissions(permissions, REQUEST_LOCATION_PERMISSION);
         }
+        currentLocation = null;
     }
 
     @Override
@@ -244,6 +248,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach: Fragment attached to activity");
         super.onAttach(context);
         this.context = context;
         isGPSOn = Util.isGPSOn(context);
@@ -300,19 +305,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
+        moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM);
         map.setBuildingsEnabled(true);
-        LatLng currentLocation;
         if(locationPermissionGranted){
             initSearchBar();
+            //getDeviceLocation();
 
-            currentLocation =  Util.getDeviceLocation(getActivity());
-            moveCamera(currentLocation, DEFAULT_ZOOM);
+            // TODO fix null pointer exception happening here
+            currentLocation = Util.getDeviceLocation(context);
+            if(currentLocation != null) {
+                moveCamera(currentLocation, DEFAULT_ZOOM);
+            }
+
             try {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
             }catch (SecurityException e){
                 Log.d(TAG, "onMapReady: SecurityException" + e.getMessage());
             }
+
 
 
         }
@@ -370,6 +381,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
         return false;
     }
+
+    private void getDeviceLocation(){
+        locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        try{
+            if(locationPermissionGranted){
+                if(Util.isGPSOn(context)) {
+                    // GPS is on
+                    Log.d(TAG, "getDeviceLocation: GPS is on");
+                    Task location = locationProviderClient.getLastLocation();
+                    location.addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "onComplete: Found location.");
+                                Location currentLocation = (Location) task.getResult();
+                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                                moveCamera(latLng, DEFAULT_ZOOM);
+                            } else {
+                                Log.d(TAG, "onComplete: Couldn't find location");
+                                Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }else{
+                    // GPS is off
+                    Log.d(TAG, "getDeviceLocation: GPS is off");
+                }
+            }
+        }catch (SecurityException e){
+            Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
+        }
+    }
+
 
     private void geoLocate() {
         Log.d(TAG, "geoLocate: Geolocating...");

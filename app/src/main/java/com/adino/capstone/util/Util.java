@@ -38,35 +38,36 @@ public final class Util {
         FusedLocationProviderClient locationProviderClient =
                 LocationServices.getFusedLocationProviderClient(context);
         try{
-
-            Task location = locationProviderClient.getLastLocation();
-            location.addOnCompleteListener(new OnCompleteListener() {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if(task.isSuccessful()){
-                        Log.d(TAG, "onComplete: Found location.");
-                        Location currentLocation = (Location)task.getResult();
-                        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                        setLatLng(latLng);
-                    }else{
-                        Log.d(TAG, "onComplete: Couldn't find location");
-                        Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
-                    }
+            if(Util.isGPSOn(context)) {
+                Task location = locationProviderClient.getLastLocation();
+                try {
+                    location.addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "onComplete: Found location.");
+                                Location currentLocation = (Location) task.getResult();
+                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                                setLatLng(latLng);
+                            } else {
+                                Log.d(TAG, "onComplete: Couldn't find location");
+                                Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.d(TAG, "getDeviceLocation: " + e.getMessage());
                 }
-            });
-            location.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-
-                }
-            });
+            }else{
+                // GPS is off
+                Log.d(TAG, "getDeviceLocation: GPS is off");
+            }
 
         }catch (SecurityException e){
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
         }
 
         return latLng;
-
     }
 
     public static LatLng getLatLng() {

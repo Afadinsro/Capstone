@@ -69,6 +69,10 @@ public final class Constants {
     public static final LatLngBounds WORLD_LAT_LNG_BOUNDS = new LatLngBounds(
             new LatLng(-40, -168),
             new LatLng(71, 136));
+    public static final LatLng ghana_SW = new LatLng(5.082787, -2.878441);
+    public static final LatLng ghana_NE = new LatLng(11.043421, 0.636050);
+    public static final LatLngBounds GHANA = new LatLngBounds(ghana_SW, ghana_NE);
+    public static final LatLng DEFAULT_LATLNG_GBAWE = new LatLng(5.582830, -0.307473);
 
     /*
     Trending Dialog Tags
