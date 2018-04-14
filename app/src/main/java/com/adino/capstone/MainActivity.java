@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         TrendingFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
-    private int currentNavItem;
+    private int currentNavItem = -1;
 
     /**
      *
@@ -79,8 +79,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private DatabaseReference databaseReference;
     private String userID = "";
     private String userTopics = "";
-    private ArrayList<String> subscriptions = new ArrayList<>();
-    private String mCurrentPhotoPath;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -281,7 +279,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             if(resultCode == RESULT_OK){
                 signedIn = true;
                 init();
-                Snackbar.make(fab_capture_picture, "You are signed in!", Snackbar.LENGTH_SHORT);
                 Toast.makeText(this, "You are signed in!", Toast.LENGTH_SHORT).show();
             }else if (resultCode == RESULT_CANCELED){
                 signedIn = false;
@@ -309,55 +306,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     }
                 }
         }
-    }
-
-    /**
-     * Saves the given image byte array to file and returns the file
-     * @param bytes A byte array representation of the image to save
-     * @return The file which the image was saved into, null otherwise
-     */
-    private File saveImageToFile(byte[] bytes) {
-        FileOutputStream outputStream = null;
-        File file = null;
-        try {
-            file = createImageFile();
-            outputStream = new FileOutputStream(file);
-            outputStream.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(outputStream != null){
-                try{
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return file;
-    }
-
-    /**
-     * Creates a file that captured image will be saved in
-     * @return Returns the created file
-     * @throws IOException Throws IO exception if file creation fails
-     */
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
-        String imageFileName = "PHOTO_" + timeStamp;
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File image = File.createTempFile(
-                imageFileName,      /* prefix */
-                ".jpg",      /* suffix */
-                storageDir         /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
     }
 
 
@@ -400,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         if(authStateListener != null) {
             firebaseAuth.removeAuthStateListener(authStateListener);
         }
-        currentNavItem = navigation.getSelectedItemId();
+        //currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
@@ -415,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onStop() {
         super.onStop();
-        currentNavItem = navigation.getSelectedItemId();
+        //currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
