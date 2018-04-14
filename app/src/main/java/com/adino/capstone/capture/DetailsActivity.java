@@ -70,6 +70,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.DETAILS_TO_REPORTS;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PHOTOS;
@@ -770,7 +771,7 @@ public class DetailsActivity extends AppCompatActivity
                 // Get push key
                 String key = reportsDatabaseReference.getKey();
                 Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                backToReportsIntent.putExtra("detailsToReports", true);
+                backToReportsIntent.putExtra(DETAILS_TO_REPORTS, true);
                 backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(backToReportsIntent);
                 finish();

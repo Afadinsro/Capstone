@@ -108,4 +108,9 @@ public final class Constants {
     public static final int CAPTURE_NAV_ID = 2;
     public static final int REPORTS_NAV_ID = 3;
     public static final int CONTACTS_NAV_ID = 4;
+
+    /*
+    Intents
+     */
+    public static final String DETAILS_TO_REPORTS = "detailsToReports";
 }

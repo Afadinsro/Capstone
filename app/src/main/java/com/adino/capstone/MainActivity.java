@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.DETAILS_TO_REPORTS;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
@@ -191,7 +192,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                                             new AuthUI.IdpConfig.PhoneBuilder()
                                                     .setDefaultCountryIso("gh")
                                                     .build(),
-                                            new AuthUI.IdpConfig.GoogleBuilder().build()
+                                            new AuthUI.IdpConfig.GoogleBuilder()
+                                                    .build()
                                     )
                             ).build(),
                             REQUEST_SIGN_IN
@@ -456,7 +458,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
         // Navigating from details to reports?
         if (callingIntent.getExtras() != null) {
-            boolean detailsToReports = callingIntent.getExtras().getBoolean("detailsToReports");
+            boolean detailsToReports = callingIntent.getExtras().getBoolean(DETAILS_TO_REPORTS);
             String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
             String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
             // Check to make sure its from DetailsActivity
