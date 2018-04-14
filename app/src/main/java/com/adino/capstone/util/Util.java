@@ -40,6 +40,7 @@ public final class Util {
     private static LatLng latLng;
 
     public static LatLng getDeviceLocation(final Context context){
+        final LatLng[] latLngs = {null};
         FusedLocationProviderClient locationProviderClient =
                 LocationServices.getFusedLocationProviderClient(context);
         try{
@@ -53,7 +54,7 @@ public final class Util {
                                 Log.d(TAG, "onComplete: Found location.");
                                 Location currentLocation = (Location) task.getResult();
                                 LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                                setLatLng(latLng);
+                                latLngs[0] = latLng;
                             } else {
                                 Log.d(TAG, "onComplete: Couldn't find location");
                                 Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
@@ -72,7 +73,7 @@ public final class Util {
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
         }
 
-        return latLng;
+        return latLngs[0];
     }
 
     public static LatLng getLatLng() {

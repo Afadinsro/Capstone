@@ -163,7 +163,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_map, container, false);
@@ -309,10 +309,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         map.setBuildingsEnabled(true);
         if(locationPermissionGranted){
             initSearchBar();
-            //getDeviceLocation();
-
-            // TODO fix null pointer exception happening here
-            currentLocation = Util.getDeviceLocation(context);
+            currentLocation = getDeviceLocation();
             if(currentLocation != null) {
                 moveCamera(currentLocation, DEFAULT_ZOOM);
             }
@@ -382,7 +379,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         return false;
     }
 
-    private void getDeviceLocation(){
+    private LatLng getDeviceLocation(){
+        final LatLng[] latLngs = {null};
         locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         try{
             if(locationPermissionGranted){
@@ -397,6 +395,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                                 Log.d(TAG, "onComplete: Found location.");
                                 Location currentLocation = (Location) task.getResult();
                                 LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                                latLngs[0] = latLng;
                                 moveCamera(latLng, DEFAULT_ZOOM);
                             } else {
                                 Log.d(TAG, "onComplete: Couldn't find location");
@@ -412,6 +411,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }catch (SecurityException e){
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
         }
+        return latLngs[0];
     }
 
 
@@ -437,7 +437,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    private void moveCamera(LatLng latLng, float zoom){
+    private void moveCamera(@NonNull LatLng latLng, float zoom){
         Log.d(TAG, "moveCamera: Moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
