@@ -51,7 +51,7 @@ public final class Constants {
     public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
 
     /*
-    DatabaStoragese References
+    Storage References
      */
     public static final String PHOTOS = "photos";
 

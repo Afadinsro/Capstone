@@ -87,9 +87,6 @@ public class DetailsActivity extends AppCompatActivity
 
     //TODO: Add autofill for entering location in words.
 
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 111;
     private static final String TAG = "DetailsActivity";
     private boolean mLocationPermissionsGranted = false;
     public static final int DEFAULT_CAPTION_LENGTH_LIMIT = 1000;
@@ -203,6 +200,9 @@ public class DetailsActivity extends AppCompatActivity
 
     }
 
+    /**
+     * Initialize the views
+     */
     private void initViews() {
         //InputMethodManager
         final InputMethodManager inputMethodManager = (InputMethodManager)
