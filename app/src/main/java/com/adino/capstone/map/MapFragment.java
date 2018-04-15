@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -46,6 +47,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +65,9 @@ import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
+import static com.adino.capstone.util.Constants.USERS;
+import static com.adino.capstone.util.Constants.USER_FIELD_LATITUDE;
+import static com.adino.capstone.util.Constants.USER_FIELD_LONGITUDE;
 import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
 
@@ -96,6 +106,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private GeoDataClient geoDataClient;
     private LocationManager locationManager;
     private LatLng currentLocation;
+    private static double latitude, longitude;
+    private String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private DatabaseReference userReference = FirebaseDatabase.getInstance().getReference()
+            .child(USERS).child(userID);
 
     private static final String TAG = "MapFragment";
     private boolean isGPSOn = false;
@@ -151,12 +165,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }else {
                 // Ask for location permission if not granted already
                 Log.d(TAG, "onCreate: Requesting for permission");
-                //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
                 requestPermissions(permissions, REQUEST_LOCATION_PERMISSION);
             }
         }else {
             // Ask for location permission if not granted already
-            //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
             requestPermissions(permissions, REQUEST_LOCATION_PERMISSION);
         }
         currentLocation = null;
@@ -186,6 +198,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onResume() {
         super.onResume();
         isGPSOn = Util.isGPSOn(context);
+
+        userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                double latitude = -1, longitude = -1;
+                if (dataSnapshot.exists()) {
+                    for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        if(snapshot.getKey().equals(USER_FIELD_LATITUDE)){
+                            latitude = snapshot.getValue(Double.class);
+                        }else if(snapshot.getKey().equals(USER_FIELD_LONGITUDE)){
+                            longitude = snapshot.getValue(Double.class);
+                        }
+                    }
+                    Log.d(TAG, "onDataChange: Lat: " + latitude + ", Lng: " + longitude);
+                    LatLng currentLocation = new LatLng(latitude, longitude);
+                    moveCamera(currentLocation, DEFAULT_ZOOM);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -307,12 +343,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         map = googleMap;
         moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM);
         map.setBuildingsEnabled(true);
+
         if(locationPermissionGranted){
             initSearchBar();
-            currentLocation = getDeviceLocation();
-            if(currentLocation != null) {
-                moveCamera(currentLocation, DEFAULT_ZOOM);
-            }
+            getDeviceLocation();
+
+
+
+            //moveCamera(currentLocation, DEFAULT_ZOOM);
+
 
             try {
                 map.setMyLocationEnabled(true);
@@ -379,8 +418,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         return false;
     }
 
-    private LatLng getDeviceLocation(){
-        final LatLng[] latLngs = {null};
+    private void getDeviceLocation(){
         locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         try{
             if(locationPermissionGranted){
@@ -395,7 +433,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                                 Log.d(TAG, "onComplete: Found location.");
                                 Location currentLocation = (Location) task.getResult();
                                 LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                                latLngs[0] = latLng;
+                                userReference = FirebaseDatabase.getInstance().getReference().child(USERS).child(userID);
+                                userReference.child(USER_FIELD_LATITUDE).setValue(latLng.latitude);
+                                userReference.child(USER_FIELD_LONGITUDE).setValue(latLng.longitude);
                                 moveCamera(latLng, DEFAULT_ZOOM);
                             } else {
                                 Log.d(TAG, "onComplete: Couldn't find location");
@@ -411,7 +451,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }catch (SecurityException e){
             Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
         }
-        return latLngs[0];
     }
 
 
@@ -437,7 +476,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
-    private void moveCamera(@NonNull LatLng latLng, float zoom){
+    private void moveCamera(LatLng latLng, float zoom){
         Log.d(TAG, "moveCamera: Moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }

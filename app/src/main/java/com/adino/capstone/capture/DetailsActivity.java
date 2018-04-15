@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -46,11 +47,15 @@ import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -70,6 +75,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.DETAILS_TO_REPORTS;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
@@ -111,7 +117,7 @@ public class DetailsActivity extends AppCompatActivity
     private UploadTask uploadTask;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference reportsDatabaseReference;
-    FirebaseJobDispatcher jobDispatcher;
+    private FirebaseJobDispatcher jobDispatcher;
 
     /**
      * Text Fields
@@ -196,7 +202,7 @@ public class DetailsActivity extends AppCompatActivity
         mPhotosStorageReference = mFirebaseStorage.getReference().child(PHOTOS);
         firebaseDatabase = FirebaseDatabase.getInstance();
         reportsDatabaseReference = firebaseDatabase.getReference().child(REPORTS);
-        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getBaseContext()));
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
 
     }
 
@@ -325,7 +331,7 @@ public class DetailsActivity extends AppCompatActivity
                      */
                     jobParameters.putString(PUSHED_REPORT_KEY, pushKey);
                     jobParameters.putString(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
-                    Job uploadJob = createUploadMediaJob(jobDispatcher, jobParameters);
+                    Job uploadJob = createUploadMediaJob(jobParameters);
 
 
                     jobDispatcher.mustSchedule(uploadJob);
@@ -334,9 +340,10 @@ public class DetailsActivity extends AppCompatActivity
 
                     // TODO navigate to reports immediately with the image file and a pending status
                     Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                    backToReportsIntent.putExtra("detailsToReports", true);
+                    backToReportsIntent.putExtra(DETAILS_TO_REPORTS, true);
                     backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
                     backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
+                    backToReportsIntent.putExtra(IMAGE_BYTE_ARRAY, photo);
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
@@ -359,23 +366,56 @@ public class DetailsActivity extends AppCompatActivity
         date = getCurrentDate();
         caption = getCaption();
         location = getLocationInWords();
-        LatLng gps = Util.getDeviceLocation(this);
+        LatLng gps = getDeviceLocation();
         Report report = new Report(caption, date, category, imageURL, location, gps.longitude, gps.latitude);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
         reportsDatabaseReference.child(userID).child(pushKey).setValue(report);
         return pushKey;
     }
 
+    private LatLng getDeviceLocation(){
+        final LatLng[] latLngs = {null};
+        FusedLocationProviderClient locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        try{
+            if(locationPermissionGranted){
+                if(Util.isGPSOn(context)) {
+                    // GPS is on
+                    Log.d(TAG, "getDeviceLocation: GPS is on");
+                    Task location = locationProviderClient.getLastLocation();
+                    location.addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            if (task.isSuccessful()) {
+                                Log.d(TAG, "onComplete: Found location.");
+                                Location currentLocation = (Location) task.getResult();
+                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                                latLngs[0] = latLng;
+                            } else {
+                                Log.d(TAG, "onComplete: Couldn't find location");
+                                Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+                }else{
+                    // GPS is off
+                    Log.d(TAG, "getDeviceLocation: GPS is off");
+                }
+            }
+        }catch (SecurityException e){
+            Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
+        }
+        return latLngs[0];
+    }
+
 
     /**
      * Creates a new job using the FirebaseJobDispatcher and the job parameters given.
-     * @param dispatcher FirebaseJobDispatcher
      * @param jobParameters Job parameters
      * @return Job
      */
-    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
+    private Job createUploadMediaJob(Bundle jobParameters) {
         Log.d(TAG, "createUploadMediaJob: Creating job...");
-        return dispatcher.newJobBuilder()
+        return jobDispatcher.newJobBuilder()
                 // the JobService that will be called
                 .setService(UploadMediaService.class)
                 // uniquely identifies the job

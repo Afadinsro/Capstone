@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         };
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
-//            init();
             userID = firebaseAuth.getCurrentUser().getUid();
             databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
                     .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
@@ -383,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         if(signedIn) {
             init();
 
-            //navigation.setSelectedItemId(currentNavItem);
+            // Update user's location
         }
     }
 
@@ -409,11 +408,12 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             boolean detailsToReports = callingIntent.getExtras().getBoolean(DETAILS_TO_REPORTS);
             String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
             String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
+            byte[] photo = callingIntent.getExtras().getByteArray(IMAGE_BYTE_ARRAY);
             // Check to make sure its from DetailsActivity
             if (detailsToReports) {
                 navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
                 fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey,
-                        path)).commitAllowingStateLoss();
+                        path, photo)).commitAllowingStateLoss();
             } else {
                 navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
                 fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();

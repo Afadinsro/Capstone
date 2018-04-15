@@ -38,7 +38,6 @@ import static com.adino.capstone.util.Constants.DIALOG_TOPIC;
 import static com.adino.capstone.util.Constants.DIALOG_USER_SUBSCRIPTIONS;
 import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.USER_FIELD_SUBSCRIPTIONS;
-import static com.adino.capstone.util.Constants.USER_SUBSCRIPTIONS;
 
 /**
  * Created by afadinsro on 3/23/18.
@@ -86,7 +85,7 @@ public class TrendingDialogFragment extends DialogFragment {
             Log.d(TAG, "onCreateView: " + e.getMessage());
         }
         Log.d(TAG, "onCreateView: UID: " + userID);
-        reference = FirebaseDatabase.getInstance().getReference(USERS).child(userID).child(USER_SUBSCRIPTIONS);
+        reference = FirebaseDatabase.getInstance().getReference(USERS).child(userID).child(USER_FIELD_SUBSCRIPTIONS);
         Log.d(TAG, "onCreateView: reference created.");
         subscriptionsValListener = new ValueEventListener() {
             @Override

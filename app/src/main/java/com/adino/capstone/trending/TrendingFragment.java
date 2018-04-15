@@ -27,9 +27,6 @@ import com.google.firebase.database.Query;
 
 import static com.adino.capstone.util.Constants.GRID_COLUMN_COUNT;
 import static com.adino.capstone.util.Constants.TRENDING;
-import static com.adino.capstone.util.Constants.USER_ID;
-import static com.adino.capstone.util.Constants.USER_SUBSCRIPTIONS;
-
 
 /**
  * A simple {@link Fragment} subclass.
