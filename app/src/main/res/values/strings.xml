@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Capstone</string>
+    <string name="app_name">Disaster Aide</string>
     <!--BOTTOM NAV TITLES-->
     <string name="title_reports">Reports</string>
     <string name="title_capture">Capture</string>

@@ -199,6 +199,7 @@ public class TrendingDialogFragment extends DialogFragment {
     private void unsubscribeFromTopic(String topic) {
         imgSubscribe.setColorFilter(ContextCompat.getColor(context, R.color.grey),
                 PorterDuff.Mode.SRC_IN);
+        imgSubscribe.setImageResource(R.drawable.ic_notifications_off_black_24dp);
         FirebaseMessaging.getInstance().unsubscribeFromTopic(topic);
         subscribedToTopic = false;
         if(subscriptions.contains(topic)) {
@@ -210,6 +211,7 @@ public class TrendingDialogFragment extends DialogFragment {
     private void subscribeToTopic(String topic) {
         imgSubscribe.setColorFilter(ContextCompat.getColor(context, R.color.colorPrimaryDark),
                 PorterDuff.Mode.SRC_IN);
+        imgSubscribe.setImageResource(R.drawable.ic_notifications_active_black_24dp);
         FirebaseMessaging.getInstance().subscribeToTopic(topic);
         subscribedToTopic = true;
         if(!subscriptions.contains(topic)) {
