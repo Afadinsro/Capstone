@@ -5,12 +5,12 @@ public class Agency {
     private String name;
     private String info;
     private String imageURL;
-    private String phone;
+    private Long phone;
 
     public Agency() {
     }
 
-    public Agency(String name, String info, String imageURL, String phone) {
+    public Agency(String name, String info, String imageURL, Long phone) {
         setName(name);
         setInfo(info);
         setImageURL(imageURL);
@@ -41,11 +41,11 @@ public class Agency {
         this.imageURL = imageURL;
     }
 
-    public String getPhone() {
+    public Long getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
+    public void setPhone(Long phone) {
         this.phone = phone;
     }
 }

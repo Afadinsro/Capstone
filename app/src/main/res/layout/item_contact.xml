@@ -21,7 +21,7 @@
         android:padding="@dimen/material_16">
 
         <ImageView
-            android:id="@+id/img_contact_pic"
+            android:id="@+id/img_agency_pic"
             android:layout_width="@dimen/img_contact_pic_width"
             android:layout_height="match_parent"
             android:layout_alignParentStart="true"
@@ -36,7 +36,7 @@
             android:layout_marginEnd="@dimen/material_8"
             android:layout_marginStart="@dimen/material_8"
             android:layout_marginTop="@dimen/material_24"
-            android:layout_toEndOf="@id/img_contact_pic"
+            android:layout_toEndOf="@id/img_agency_pic"
             android:gravity="fill_horizontal"
             android:text="@string/agency_name_placeholder"
             android:textSize="@dimen/txt_size_18" />
@@ -48,7 +48,7 @@
             android:layout_marginEnd="@dimen/material_8"
             android:layout_marginStart="@dimen/material_8"
             android:layout_toStartOf="@id/img_phone_icon"
-            android:layout_toEndOf="@id/img_contact_pic"
+            android:layout_toEndOf="@id/img_agency_pic"
             android:layout_marginTop="@dimen/material_8"
             android:layout_below="@id/txt_agency_name"
             android:gravity="fill_horizontal"
@@ -63,9 +63,12 @@
             android:layout_marginEnd="@dimen/material_16"
             android:layout_below="@id/txt_agency_name"
             android:layout_centerVertical="true"
+            android:layout_marginTop="@dimen/material_8"
             app:srcCompat="@drawable/ic_phone_black_24dp"
             android:contentDescription="@string/default_content_description"
-            android:tint="@color/colorPrimaryDark"/>
+            android:tint="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <ImageView
             android:id="@+id/img_message_icon"
@@ -73,11 +76,14 @@
             android:layout_height="@dimen/material_48"
             android:layout_below="@id/txt_agency_name"
             android:layout_alignBaseline="@id/img_phone_icon"
+            android:layout_marginTop="@dimen/material_8"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             app:srcCompat="@drawable/ic_message_black_24dp"
             android:contentDescription="@string/default_content_description"
-            android:tint="@color/colorPrimaryDark"/>
+            android:tint="@color/colorPrimaryDark"
+            android:clickable="true"
+            android:focusable="true"/>
 
     </RelativeLayout>
     </android.support.v7.widget.CardView>

@@ -67,6 +67,7 @@ public final class Constants {
     public static final String REPORTS = "reports";
     public static final String TRENDING = "trending";
     public static final String USERS = "users";
+    public static final String CONTACTS = "contacts";
 
     /*
     Grid Layout
