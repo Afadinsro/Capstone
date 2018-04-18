@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -47,21 +46,18 @@ import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -75,7 +71,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.DETAILS_TO_REPORTS;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
@@ -85,6 +80,7 @@ import static com.adino.capstone.util.Constants.REPORTS;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
+import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
 public class DetailsActivity extends AppCompatActivity
@@ -93,6 +89,9 @@ public class DetailsActivity extends AppCompatActivity
 
     //TODO: Add autofill for entering location in words.
 
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 111;
     private static final String TAG = "DetailsActivity";
     private boolean mLocationPermissionsGranted = false;
     public static final int DEFAULT_CAPTION_LENGTH_LIMIT = 1000;
@@ -117,7 +116,7 @@ public class DetailsActivity extends AppCompatActivity
     private UploadTask uploadTask;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference reportsDatabaseReference;
-    private FirebaseJobDispatcher jobDispatcher;
+    FirebaseJobDispatcher jobDispatcher;
 
     /**
      * Text Fields
@@ -202,13 +201,10 @@ public class DetailsActivity extends AppCompatActivity
         mPhotosStorageReference = mFirebaseStorage.getReference().child(PHOTOS);
         firebaseDatabase = FirebaseDatabase.getInstance();
         reportsDatabaseReference = firebaseDatabase.getReference().child(REPORTS);
-        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+        jobDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getBaseContext()));
 
     }
 
-    /**
-     * Initialize the views
-     */
     private void initViews() {
         //InputMethodManager
         final InputMethodManager inputMethodManager = (InputMethodManager)
@@ -331,7 +327,7 @@ public class DetailsActivity extends AppCompatActivity
                      */
                     jobParameters.putString(PUSHED_REPORT_KEY, pushKey);
                     jobParameters.putString(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
-                    Job uploadJob = createUploadMediaJob(jobParameters);
+                    Job uploadJob = createUploadMediaJob(jobDispatcher, jobParameters);
 
 
                     jobDispatcher.mustSchedule(uploadJob);
@@ -340,10 +336,9 @@ public class DetailsActivity extends AppCompatActivity
 
                     // TODO navigate to reports immediately with the image file and a pending status
                     Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                    backToReportsIntent.putExtra(DETAILS_TO_REPORTS, true);
+                    backToReportsIntent.putExtra("detailsToReports", true);
                     backToReportsIntent.putExtra(PUSHED_REPORT_KEY, pushKey);
                     backToReportsIntent.putExtra(IMAGE_FILE_ABS_PATH, mCurrentPhotoPath);
-                    backToReportsIntent.putExtra(IMAGE_BYTE_ARRAY, photo);
                     backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(backToReportsIntent);
                 }
@@ -366,56 +361,22 @@ public class DetailsActivity extends AppCompatActivity
         date = getCurrentDate();
         caption = getCaption();
         location = getLocationInWords();
-        LatLng gps = getDeviceLocation();
-        Report report = new Report(caption, date, category, imageURL, location, gps.longitude, gps.latitude);
+        Report report = new Report(caption, date, category, imageURL, location);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
         reportsDatabaseReference.child(userID).child(pushKey).setValue(report);
         return pushKey;
     }
 
-    private LatLng getDeviceLocation(){
-        final LatLng[] latLngs = {null};
-        FusedLocationProviderClient locationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-        try{
-            if(locationPermissionGranted){
-                if(Util.isGPSOn(context)) {
-                    // GPS is on
-                    Log.d(TAG, "getDeviceLocation: GPS is on");
-                    Task location = locationProviderClient.getLastLocation();
-                    location.addOnCompleteListener(new OnCompleteListener() {
-                        @Override
-                        public void onComplete(@NonNull Task task) {
-                            if (task.isSuccessful()) {
-                                Log.d(TAG, "onComplete: Found location.");
-                                Location currentLocation = (Location) task.getResult();
-                                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                                latLngs[0] = latLng;
-                            } else {
-                                Log.d(TAG, "onComplete: Couldn't find location");
-                                Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-                }else{
-                    // GPS is off
-                    Log.d(TAG, "getDeviceLocation: GPS is off");
-                }
-            }
-        }catch (SecurityException e){
-            Log.d(TAG, "getDeviceLocation: SecurityException" + e.getMessage());
-        }
-        return latLngs[0];
-    }
-
 
     /**
      * Creates a new job using the FirebaseJobDispatcher and the job parameters given.
+     * @param dispatcher FirebaseJobDispatcher
      * @param jobParameters Job parameters
      * @return Job
      */
-    private Job createUploadMediaJob(Bundle jobParameters) {
+    private Job createUploadMediaJob(FirebaseJobDispatcher dispatcher, Bundle jobParameters) {
         Log.d(TAG, "createUploadMediaJob: Creating job...");
-        return jobDispatcher.newJobBuilder()
+        return dispatcher.newJobBuilder()
                 // the JobService that will be called
                 .setService(UploadMediaService.class)
                 // uniquely identifies the job
@@ -768,66 +729,6 @@ public class DetailsActivity extends AppCompatActivity
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    /**
-     *  Uploads the captured image to Firebase storage using an upload task
-     *  On successful upload, a record of the report is uploaded to the database
-     *  with all report details including a link to the image in storage
-     */
-    private void uploadImage(){
-        try {
-            File imageFile = createImageFile();
-            Uri file = Uri.fromFile(imageFile);
-            String photoFIle = getIntent().getStringExtra("photoUri");
-            StorageReference photoRef = mPhotosStorageReference.child(file.getLastPathSegment());
-
-            // Create file metadata including the content type
-            StorageMetadata metadata = new StorageMetadata.Builder()
-                    .setContentType("image/jpg")
-                    .build();
-            //uploadTask = photoRef.putFile(file);
-            uploadTask = photoRef.putBytes(photo, metadata);
-
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                assert downloadUrl != null;
-                imageURL = downloadUrl.toString();
-
-                category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
-                        getSelectedCategory(selectedTbtn).toString();
-                date = getCurrentDate();
-                caption = getCaption();
-                location = getLocationInWords();
-                Report report = new Report(caption, date, category, imageURL, location);
-
-                reportsDatabaseReference.push().setValue(report);
-                // Get push key
-                String key = reportsDatabaseReference.getKey();
-                Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                backToReportsIntent.putExtra(DETAILS_TO_REPORTS, true);
-                backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(backToReportsIntent);
-                finish();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Snackbar.make(fabSend, "Image uploaded failed!", Snackbar.LENGTH_LONG)
-                        .setAction("Retry", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                fabSend.callOnClick();
-                            }
-                        }).show();
-            }
-        });
     }
 
     private void initLocationAutoComplete(){
