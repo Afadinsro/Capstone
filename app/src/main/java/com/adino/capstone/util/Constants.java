@@ -48,10 +48,16 @@ public final class Constants {
     public static final String REPORT_FIELD_LOCATION = "location";
     public static final String REPORT_FIELD_VIDEOURL = "videoURL";
     public static final String REPORT_FIELD_TOPIC = "topic";
+    public static final String REPORT_FIELD_LATITUDE = "latitude";
+    public static final String REPORT_FIELD_LONGITUDE = "longitude";
     public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
+    public static final String USER_FIELD_LATITUDE = "latitude";
+    public static final String USER_FIELD_LONGITUDE = "longitude";
+    public static final String USER_FIELD_USERID = "userID";
+
 
     /*
-    DatabaStoragese References
+    Storage References
      */
     public static final String PHOTOS = "photos";
 

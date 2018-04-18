@@ -57,6 +57,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -79,6 +80,7 @@ import static com.adino.capstone.util.Constants.REPORTS;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.UPLOAD_MEDIA_TAG;
+import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.WORLD_LAT_LNG_BOUNDS;
 
 public class DetailsActivity extends AppCompatActivity
@@ -359,8 +361,7 @@ public class DetailsActivity extends AppCompatActivity
         date = getCurrentDate();
         caption = getCaption();
         location = getLocationInWords();
-        LatLng gps = Util.getDeviceLocation(this);
-        Report report = new Report(caption, date, category, imageURL, location, gps.longitude, gps.latitude);
+        Report report = new Report(caption, date, category, imageURL, location);
         String pushKey = reportsDatabaseReference.push().getKey(); // GET PUSH KEY
         reportsDatabaseReference.child(userID).child(pushKey).setValue(report);
         return pushKey;
@@ -728,66 +729,6 @@ public class DetailsActivity extends AppCompatActivity
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    /**
-     *  Uploads the captured image to Firebase storage using an upload task
-     *  On successful upload, a record of the report is uploaded to the database
-     *  with all report details including a link to the image in storage
-     */
-    private void uploadImage(){
-        try {
-            File imageFile = createImageFile();
-            Uri file = Uri.fromFile(imageFile);
-            String photoFIle = getIntent().getStringExtra("photoUri");
-            StorageReference photoRef = mPhotosStorageReference.child(file.getLastPathSegment());
-
-            // Create file metadata including the content type
-            StorageMetadata metadata = new StorageMetadata.Builder()
-                    .setContentType("image/jpg")
-                    .build();
-            //uploadTask = photoRef.putFile(file);
-            uploadTask = photoRef.putBytes(photo, metadata);
-
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                assert downloadUrl != null;
-                imageURL = downloadUrl.toString();
-
-                category = (radioOther.isChecked()) ? txtOtherCategory.getText().toString() :
-                        getSelectedCategory(selectedTbtn).toString();
-                date = getCurrentDate();
-                caption = getCaption();
-                location = getLocationInWords();
-                Report report = new Report(caption, date, category, imageURL, location);
-
-                reportsDatabaseReference.push().setValue(report);
-                // Get push key
-                String key = reportsDatabaseReference.getKey();
-                Intent backToReportsIntent = new Intent(DetailsActivity.this, MainActivity.class);
-                backToReportsIntent.putExtra(DETAILS_TO_REPORTS, true);
-                backToReportsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(backToReportsIntent);
-                finish();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Snackbar.make(fabSend, "Image uploaded failed!", Snackbar.LENGTH_LONG)
-                        .setAction("Retry", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                fabSend.callOnClick();
-                            }
-                        }).show();
-            }
-        });
     }
 
     private void initLocationAutoComplete(){

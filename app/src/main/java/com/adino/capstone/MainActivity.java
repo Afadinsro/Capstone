@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.adino.capstone.capture.DetailsActivity;
 import com.adino.capstone.contacts.ContactsFragment;
 import com.adino.capstone.map.MapFragment;
-import com.adino.capstone.model.User;
 import com.adino.capstone.reports.ReportsFragment;
 import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
@@ -40,7 +39,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,12 +51,12 @@ import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
-import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
 import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.USER_FIELD_SUBSCRIPTIONS;
+import static com.adino.capstone.util.Constants.USER_FIELD_USERID;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
@@ -76,7 +74,9 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference databaseReference;
+    private DatabaseReference userSubscriptionRef;
+    private DatabaseReference usersReference = FirebaseDatabase.getInstance().getReference()
+            .child(USERS);
     private String userID = "";
     private String userTopics = "";
     private ArrayList<String> subscriptions = new ArrayList<>();
@@ -203,12 +203,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         };
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
-//            init();
-            userID = firebaseAuth.getCurrentUser().getUid();
-            databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
+            userSubscriptionRef = FirebaseDatabase.getInstance().getReference(USERS)
                     .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
 
-            databaseReference.addValueEventListener(new ValueEventListener() {
+            userSubscriptionRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     try {
@@ -280,6 +278,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }else if(requestCode == REQUEST_SIGN_IN){
             if(resultCode == RESULT_OK){
                 signedIn = true;
+                userID = firebaseAuth.getCurrentUser().getUid();
+                usersReference.child(userID).child(USER_FIELD_USERID).setValue(userID);
                 init();
                 Snackbar.make(fab_capture_picture, "You are signed in!", Snackbar.LENGTH_SHORT);
                 Toast.makeText(this, "You are signed in!", Toast.LENGTH_SHORT).show();
@@ -311,32 +311,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
     }
 
-    /**
-     * Saves the given image byte array to file and returns the file
-     * @param bytes A byte array representation of the image to save
-     * @return The file which the image was saved into, null otherwise
-     */
-    private File saveImageToFile(byte[] bytes) {
-        FileOutputStream outputStream = null;
-        File file = null;
-        try {
-            file = createImageFile();
-            outputStream = new FileOutputStream(file);
-            outputStream.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(outputStream != null){
-                try{
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return file;
-    }
 
     /**
      * Creates a file that captured image will be saved in

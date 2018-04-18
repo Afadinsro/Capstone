@@ -14,11 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.adino.capstone.MainActivity;
 import com.adino.capstone.R;
 import com.adino.capstone.model.Report;
+import com.adino.capstone.model.User;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -28,15 +29,21 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.util.List;
 
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
+import static com.adino.capstone.util.Constants.PHOTOS;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REPORTS;
 import static com.adino.capstone.util.Constants.REPORT_FIELD_IMAGEURL;
+import static com.adino.capstone.util.Constants.REPORT_FIELD_LATITUDE;
+import static com.adino.capstone.util.Constants.REPORT_FIELD_LONGITUDE;
+import static com.adino.capstone.util.Constants.USERS;
 
 
 /**
@@ -54,17 +61,24 @@ public class ReportsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String key;
-    private String path;
+    private String pushKey;
+    private String imageAbsPath;
     private static final String TAG = "ReportsFragment";
     private RecyclerView rv_reports;
     private Context context;
+    private String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     /**
      * Firebase
      */
     private FirebaseRecyclerAdapter<Report, ReportViewHolder> adapter;
-    private DatabaseReference databaseReference;
+    private DatabaseReference reportsDatabaseRef = FirebaseDatabase.getInstance().getReference()
+            .child(REPORTS).child(userID);
+    private DatabaseReference usersDatabaseRef = FirebaseDatabase.getInstance().getReference(USERS)
+            .child(userID);
+    private UploadTask uploadTask;
+    private StorageReference photosStorageRef = FirebaseStorage.getInstance().getReference()
+            .child(PHOTOS);
 
     private OnFragmentInteractionListener mListener;
 
@@ -97,8 +111,25 @@ public class ReportsFragment extends Fragment {
 
         Log.d(TAG, "onCreate: In onCreate");
         if (getArguments() != null) {
-            key = getArguments().getString(PUSHED_REPORT_KEY);
-            path = getArguments().getString(IMAGE_FILE_ABS_PATH);
+            pushKey = getArguments().getString(PUSHED_REPORT_KEY);
+            imageAbsPath = getArguments().getString(IMAGE_FILE_ABS_PATH);
+            usersDatabaseRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.hasChildren()){
+                        User user = dataSnapshot.getValue(User.class);
+                        FirebaseDatabase.getInstance().getReference().child(REPORTS).child(userID)
+                                .child(pushKey).child(REPORT_FIELD_LONGITUDE).setValue(user.getLongitude());
+                        FirebaseDatabase.getInstance().getReference().child(REPORTS).child(userID)
+                                .child(pushKey).child(REPORT_FIELD_LATITUDE).setValue(user.getLatitude());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
         context = getContext();
     }
@@ -114,11 +145,9 @@ public class ReportsFragment extends Fragment {
         /*
          * Firebase
          */
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        databaseReference = FirebaseDatabase.getInstance().getReference().child(REPORTS).child(uid);
-        databaseReference.keepSynced(true);
+        reportsDatabaseRef.keepSynced(true);
         
-        Query query = databaseReference.limitToLast(100);
+        Query query = reportsDatabaseRef.limitToLast(100);
         FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
                 .setQuery(query, Report.class)
                 .build();
@@ -175,7 +204,7 @@ public class ReportsFragment extends Fragment {
 
                         // TODO upload reports to /reports/userid/ instead of /reports/
                         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("reports");
-                        databaseReference.child(key).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        databaseReference.child(pushKey).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Toast.makeText(getActivity(), "ImageURL updated", Toast.LENGTH_SHORT).show();
@@ -192,6 +221,39 @@ public class ReportsFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    /**
+     *  Uploads the captured image to Firebase storage using an upload task
+     *  On successful upload, a record of the report is uploaded to the database
+     *  with all report details including a link to the image in storage
+     */
+    private void uploadImage(){
+
+        File imageFile = new File(imageAbsPath);
+        Uri file = Uri.fromFile(imageFile);
+        StorageReference photoRef = photosStorageRef.child(userID).child(file.getLastPathSegment());
+
+        // Create file metadata including the content type
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setContentType("image/jpg")
+                .build();
+        uploadTask = photoRef.putFile(file, metadata);
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                assert downloadUrl != null;
+                String imageURL = downloadUrl.toString();
+                reportsDatabaseRef.child(pushKey).child(REPORT_FIELD_IMAGEURL).setValue(imageURL);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // TODO alert user
+            }
+        });
     }
 
     @Override
