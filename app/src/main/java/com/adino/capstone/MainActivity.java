@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private DatabaseReference databaseReference;
     private String userID = "";
     private String userTopics = "";
+    private Bundle instanceState;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -97,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_map:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new MapFragment())
-//                            .addToBackStack(MapFragment.class.getName())
+                            .addToBackStack(MapFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_trending:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new TrendingFragment())
-//                            .addToBackStack(TrendingFragment.class.getName())
+                            .addToBackStack(TrendingFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_reports:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ReportsFragment())
-//                            .addToBackStack(ReportsFragment.class.getName())
+                            .addToBackStack(ReportsFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -126,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_contacts:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ContactsFragment())
-//                            .addToBackStack(ContactsFragment.class.getName())
+                            .addToBackStack(ContactsFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -161,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        instanceState = savedInstanceState;
         firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -231,11 +233,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             });
         }
 
-    }
-
-    @Override
-    public void onActivityReenter(int resultCode, Intent data) {
-        super.onActivityReenter(resultCode, data);
     }
 
     @Override
@@ -347,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         if(authStateListener != null) {
             firebaseAuth.removeAuthStateListener(authStateListener);
         }
-        //currentNavItem = navigation.getSelectedItemId();
+//        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
@@ -362,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onStop() {
         super.onStop();
-        //currentNavItem = navigation.getSelectedItemId();
+//        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
@@ -372,6 +369,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 //        if(signedIn) {
 //            init();
 //            navigation.setSelectedItemId(currentNavItem);
+        Log.d(TAG, "onRestart: Nav item: " + currentNavItem);
 //        }
     }
 
@@ -379,9 +377,8 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onResume() {
         super.onResume();
         firebaseAuth.addAuthStateListener(authStateListener);
-        if(signedIn) {
+        if (signedIn) {
             init();
-
             // Update user's location
         }
     }
@@ -425,6 +422,12 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("SelectedNav", currentNavItem);
+        super.onSaveInstanceState(outState);
     }
 
     private void initCameraPermission() {
