@@ -191,8 +191,6 @@ public class DetailsActivity extends AppCompatActivity
             //ActivityCompat.requestPermissions(getActivity(), permissions, REQUEST_LOCATION_PERMISSION);
             Permissions.requestPermissions(this, permissions, REQUEST_LOCATION_PERMISSION);
         }
-
-
         initViews();
 
         mFirebaseStorage = FirebaseStorage.getInstance();

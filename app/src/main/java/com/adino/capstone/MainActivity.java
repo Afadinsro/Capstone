@@ -82,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     private String userTopics = "";
     private ArrayList<String> subscriptions = new ArrayList<>();
     private String mCurrentPhotoPath;
-    private ArrayList<String> subscriptions = new ArrayList<>();
-    private String mCurrentPhotoPath;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -167,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        instanceState = savedInstanceState;
         firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -207,12 +204,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         };
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
-<<<<<<< Temporary merge branch 1
-            userID = firebaseAuth.getCurrentUser().getUid();
-            databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
-=======
             userSubscriptionRef = FirebaseDatabase.getInstance().getReference(USERS)
->>>>>>> Temporary merge branch 2
                     .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
 
             userSubscriptionRef.addValueEventListener(new ValueEventListener() {
@@ -314,8 +306,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
     }
 
-<<<<<<< Temporary merge branch 1
-=======
 
     /**
      * Creates a file that captured image will be saved in
@@ -339,7 +329,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         return image;
     }
 
->>>>>>> Temporary merge branch 2
 
     /**
      * Adds the given image file to the gallery
@@ -458,12 +447,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("SelectedNav", currentNavItem);
-        super.onSaveInstanceState(outState);
     }
 
     private void initCameraPermission() {

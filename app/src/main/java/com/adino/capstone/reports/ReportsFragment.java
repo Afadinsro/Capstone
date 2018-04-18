@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +37,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.util.List;
 
+import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PHOTOS;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
@@ -63,6 +65,7 @@ public class ReportsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String pushKey;
     private String imageAbsPath;
+    private byte[] photo;
     private static final String TAG = "ReportsFragment";
     private RecyclerView rv_reports;
     private Context context;
@@ -96,11 +99,12 @@ public class ReportsFragment extends Fragment {
      * @return A new instance of fragment ReportsFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ReportsFragment newInstance(String key, String path) {
+    public static ReportsFragment newInstance(String key, String path,byte[] photo) {
         ReportsFragment fragment = new ReportsFragment();
         Bundle args = new Bundle();
         args.putString(PUSHED_REPORT_KEY, key);
         args.putString(IMAGE_FILE_ABS_PATH, path);
+        args.putByteArray(IMAGE_BYTE_ARRAY, photo);
         fragment.setArguments(args);
         return fragment;
     }
@@ -113,6 +117,7 @@ public class ReportsFragment extends Fragment {
         if (getArguments() != null) {
             pushKey = getArguments().getString(PUSHED_REPORT_KEY);
             imageAbsPath = getArguments().getString(IMAGE_FILE_ABS_PATH);
+            photo = getArguments().getByteArray(IMAGE_BYTE_ARRAY);
             usersDatabaseRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -130,6 +135,7 @@ public class ReportsFragment extends Fragment {
 
                 }
             });
+            uploadImage();
         }
         context = getContext();
     }
@@ -169,8 +175,13 @@ public class ReportsFragment extends Fragment {
         rv_reports.setAdapter(adapter);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(context, LinearLayoutManager.VERTICAL);
         rv_reports.addItemDecoration(dividerItemDecoration);
-
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
     }
 
     @Override
@@ -189,31 +200,6 @@ public class ReportsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: called");
-        // Check if image upload has been successful
-        StorageReference reference = FirebaseStorage.getInstance().getReference("reports");
-        List<UploadTask> activeUploadTasks = reference.getActiveUploadTasks();
-        for(UploadTask uploadTask: activeUploadTasks){
-            // Expecting only one upload task to be active
-            if(activeUploadTasks.size() == 1) {
-                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Log.d(TAG, "onSuccess: Upload successful");
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        assert downloadUrl != null;
-
-                        // TODO upload reports to /reports/userid/ instead of /reports/
-                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("reports");
-                        databaseReference.child(pushKey).child(REPORT_FIELD_IMAGEURL).setValue(downloadUrl).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(getActivity(), "ImageURL updated", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                });
-            }
-        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -232,12 +218,14 @@ public class ReportsFragment extends Fragment {
 
         File imageFile = new File(imageAbsPath);
         Uri file = Uri.fromFile(imageFile);
+
         StorageReference photoRef = photosStorageRef.child(userID).child(file.getLastPathSegment());
 
         // Create file metadata including the content type
         StorageMetadata metadata = new StorageMetadata.Builder()
                 .setContentType("image/jpg")
                 .build();
+        //uploadTask = photoRef.putBytes(photo, metadata);
         uploadTask = photoRef.putFile(file, metadata);
 
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
