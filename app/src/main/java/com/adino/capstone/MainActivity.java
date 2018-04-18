@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -25,7 +24,6 @@ import android.widget.Toast;
 import com.adino.capstone.capture.DetailsActivity;
 import com.adino.capstone.contacts.ContactsFragment;
 import com.adino.capstone.map.MapFragment;
-import com.adino.capstone.model.User;
 import com.adino.capstone.reports.ReportsFragment;
 import com.adino.capstone.trending.TrendingFragment;
 import com.adino.capstone.util.BottomNavigationViewHelper;
@@ -41,7 +39,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,19 +51,19 @@ import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
-import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
 import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
 import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.USER_FIELD_SUBSCRIPTIONS;
+import static com.adino.capstone.util.Constants.USER_FIELD_USERID;
 
 public class MainActivity extends AppCompatActivity implements MapFragment.OnFragmentInteractionListener,
         ReportsFragment.OnFragmentInteractionListener, ContactsFragment.OnFragmentInteractionListener,
         TrendingFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
-    private int currentNavItem = -1;
+    private int currentNavItem;
 
     /**
      *
@@ -77,10 +74,13 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
     private FirebaseAuth.AuthStateListener authStateListener;
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference databaseReference;
+    private DatabaseReference userSubscriptionRef;
+    private DatabaseReference usersReference = FirebaseDatabase.getInstance().getReference()
+            .child(USERS);
     private String userID = "";
     private String userTopics = "";
-    private Bundle instanceState;
+    private ArrayList<String> subscriptions = new ArrayList<>();
+    private String mCurrentPhotoPath;
 
     private FloatingActionButton fab_capture_picture;
     private FloatingActionButton fab_capture_video;
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_map:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new MapFragment())
-                            .addToBackStack(MapFragment.class.getName())
+//                            .addToBackStack(MapFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_trending:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new TrendingFragment())
-                            .addToBackStack(TrendingFragment.class.getName())
+//                            .addToBackStack(TrendingFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_reports:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ReportsFragment())
-                            .addToBackStack(ReportsFragment.class.getName())
+//                            .addToBackStack(ReportsFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                 case R.id.navigation_contacts:
                     toggleCaptureButtons(View.GONE);
                     fragmentTransaction.replace(R.id.content, new ContactsFragment())
-                            .addToBackStack(ContactsFragment.class.getName())
+//                            .addToBackStack(ContactsFragment.class.getName())
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        instanceState = savedInstanceState;
+
         firebaseAuth = FirebaseAuth.getInstance();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -203,11 +203,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         };
         signedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
         if(signedIn) {
-            userID = firebaseAuth.getCurrentUser().getUid();
-            databaseReference = FirebaseDatabase.getInstance().getReference(USERS)
+            userSubscriptionRef = FirebaseDatabase.getInstance().getReference(USERS)
                     .child(userID).child(USER_FIELD_SUBSCRIPTIONS);
 
-            databaseReference.addValueEventListener(new ValueEventListener() {
+            userSubscriptionRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     try {
@@ -233,6 +232,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             });
         }
 
+    }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+        super.onActivityReenter(resultCode, data);
     }
 
     @Override
@@ -274,7 +278,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }else if(requestCode == REQUEST_SIGN_IN){
             if(resultCode == RESULT_OK){
                 signedIn = true;
+                userID = firebaseAuth.getCurrentUser().getUid();
+                usersReference.child(userID).child(USER_FIELD_USERID).setValue(userID);
                 init();
+                Snackbar.make(fab_capture_picture, "You are signed in!", Snackbar.LENGTH_SHORT);
                 Toast.makeText(this, "You are signed in!", Toast.LENGTH_SHORT).show();
             }else if (resultCode == RESULT_CANCELED){
                 signedIn = false;
@@ -302,6 +309,29 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                     }
                 }
         }
+    }
+
+
+    /**
+     * Creates a file that captured image will be saved in
+     * @return Returns the created file
+     * @throws IOException Throws IO exception if file creation fails
+     */
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
+        String imageFileName = "PHOTO_" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        //File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        File image = File.createTempFile(
+                imageFileName,      /* prefix */
+                ".jpg",      /* suffix */
+                storageDir         /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
 
@@ -344,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         if(authStateListener != null) {
             firebaseAuth.removeAuthStateListener(authStateListener);
         }
-//        currentNavItem = navigation.getSelectedItemId();
+        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
@@ -359,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     @Override
     protected void onStop() {
         super.onStop();
-//        currentNavItem = navigation.getSelectedItemId();
+        currentNavItem = navigation.getSelectedItemId();
     }
 
     @Override
@@ -369,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 //        if(signedIn) {
 //            init();
 //            navigation.setSelectedItemId(currentNavItem);
-        Log.d(TAG, "onRestart: Nav item: " + currentNavItem);
 //        }
     }
 
@@ -377,9 +406,10 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
     protected void onResume() {
         super.onResume();
         firebaseAuth.addAuthStateListener(authStateListener);
-        if (signedIn) {
+        if(signedIn) {
             init();
-            // Update user's location
+
+            //navigation.setSelectedItemId(currentNavItem);
         }
     }
 
@@ -405,12 +435,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
             boolean detailsToReports = callingIntent.getExtras().getBoolean(DETAILS_TO_REPORTS);
             String path = callingIntent.getExtras().getString(IMAGE_FILE_ABS_PATH);
             String pushKey = callingIntent.getExtras().getString(PUSHED_REPORT_KEY);
-            byte[] photo = callingIntent.getExtras().getByteArray(IMAGE_BYTE_ARRAY);
             // Check to make sure its from DetailsActivity
             if (detailsToReports) {
                 navigation.setSelectedItemId(R.id.navigation_reports); // Set selected nav item to Reports
                 fragmentTransaction.replace(currentNavItem, ReportsFragment.newInstance(pushKey,
-                        path, photo)).commitAllowingStateLoss();
+                        path)).commitAllowingStateLoss();
             } else {
                 navigation.setSelectedItemId(R.id.navigation_trending); // Set selected nav item to Trending
                 fragmentTransaction.replace(R.id.content, new TrendingFragment()).commitAllowingStateLoss();
@@ -422,12 +451,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
         }
 
         currentNavItem = navigation.getSelectedItemId(); // Update the selected nav item.
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("SelectedNav", currentNavItem);
-        super.onSaveInstanceState(outState);
     }
 
     private void initCameraPermission() {

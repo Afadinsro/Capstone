@@ -39,7 +39,7 @@ public final class Constants {
     public static final String PATH_TO_IMAGE_FILE = "pathToImageFile";
 
     /*
-    Report Fields
+    Database Fields
      */
     public static final String REPORT_FIELD_CAPTION = "caption";
     public static final String REPORT_FIELD_CATEGORY = "category";
@@ -48,6 +48,12 @@ public final class Constants {
     public static final String REPORT_FIELD_LOCATION = "location";
     public static final String REPORT_FIELD_VIDEOURL = "videoURL";
     public static final String REPORT_FIELD_TOPIC = "topic";
+    public static final String REPORT_FIELD_LATITUDE = "latitude";
+    public static final String REPORT_FIELD_LONGITUDE = "longitude";
+    public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
+    public static final String USER_FIELD_LATITUDE = "latitude";
+    public static final String USER_FIELD_LONGITUDE = "longitude";
+    public static final String USER_FIELD_USERID = "userID";
 
 
     /*
@@ -94,9 +100,6 @@ public final class Constants {
      */
     public static final String USER_ID = "userID";
     public static final String USER_SUBSCRIPTIONS = "subscriptions";
-    public static final String USER_FIELD_SUBSCRIPTIONS = "subscriptions";
-    public static final String USER_FIELD_LATITUDE = "latitude";
-    public static final String USER_FIELD_LONGITUDE = "longitude";
 
     /*
     Notifications
