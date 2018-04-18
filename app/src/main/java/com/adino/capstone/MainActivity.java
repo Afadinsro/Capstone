@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                             .commitAllowingStateLoss();
                     // Set ID to selected
                     currentNavItem = item.getItemId();
+
                     return true;
                 case R.id.navigation_capture:
                     /*Intent toCaptureActivity = new Intent(MainActivity.this, CaptureActivity.class);
