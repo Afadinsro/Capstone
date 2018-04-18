@@ -70,4 +70,6 @@
 
     <!-- NOTIFICATIONS -->
     <string name="default_notification_channel_id">1234</string>
+    <string name="agency_name_placeholder">Agency Name</string>
+    <string name="agency_details_placeholder">Agency Details</string>
 </resources>

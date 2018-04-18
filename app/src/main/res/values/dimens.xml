@@ -6,6 +6,7 @@
     <dimen name="img_report_pic">200dp</dimen>
     <dimen name="item_report_height">150dp</dimen>
     <dimen name="img_report_pic_width">118dp</dimen>
+    <dimen name="img_contact_pic_width">118dp</dimen>
     <dimen name="rl_report_top_bottom_margins">16dp</dimen>
     <dimen name="rl_report_side_margins">16dp</dimen>
     <dimen name="bottom_nav_height">56dp</dimen>

@@ -2,12 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.adino.capstone.contacts.ContactsFragment">
+    tools:context="com.adino.capstone.contacts.ContactsFragment"
+    android:background="@color/grey">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_contacts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_contacts_fragment" />
+        android:layout_marginBottom="@dimen/bottom_nav_height"
+        android:orientation="vertical"
+        tools:listitem="@layout/item_contact"
+        android:scrollbars="vertical"/>
 
 </FrameLayout>
