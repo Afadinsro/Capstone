@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
 
             }else if(resultCode == RESULT_CANCELED){
                 // If capture was cancelled, select the previously selected nav item.
-                navigation.setSelectedItemId(currentNavItem);
+//                navigation.setSelectedItemId(currentNavItem);
             }
         }else if (requestCode == REQUEST_VIDEO_INTENT) {
             if (resultCode == RESULT_OK) {
