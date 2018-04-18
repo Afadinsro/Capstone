@@ -170,7 +170,8 @@
         android:textSize="@dimen/txt_size_16"
         android:maxLines="1"
         android:inputType="textPersonName"
-        android:hint="@string/txt_location_placeholder" />
+        android:hint="@string/txt_location_placeholder"
+        android:layout_above="@id/fab_report_submit"/>
 
     <RadioButton
         android:id="@+id/radio_other"
