@@ -21,7 +21,7 @@ public final class Permissions {
      * @param activity Given Activity
      * @param permissions Permissions to request
      */
-    public static void requestPermissions(Activity activity, String[] permissions,int tag){
+    public static void requestPermissions(Activity activity, String[] permissions, int tag){
         Log.d(TAG, "requestPermissions: Requesting for permissions...");
         ActivityCompat.requestPermissions(activity, permissions, tag);
     }

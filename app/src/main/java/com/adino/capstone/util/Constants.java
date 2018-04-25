@@ -24,6 +24,7 @@ public final class Constants {
     public static final int REQUEST_SIGN_IN = 573;
     public static final int REQUEST_GPS_ENABLE = 389;
     public static final int REQUEST_PENDING_INTENT = 437;
+    public static final int REQUEST_PHONE_CALL_PERMISSION = 278;
 
     /*
     TAGS
@@ -120,4 +121,5 @@ public final class Constants {
     Intents
      */
     public static final String DETAILS_TO_REPORTS = "detailsToReports";
+    public static final String SMS = "sms";
 }

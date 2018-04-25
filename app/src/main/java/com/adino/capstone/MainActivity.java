@@ -47,12 +47,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.adino.capstone.util.Constants.CONTACTS_NAV_ID;
 import static com.adino.capstone.util.Constants.DETAILS_TO_REPORTS;
 import static com.adino.capstone.util.Constants.IMAGE_BYTE_ARRAY;
 import static com.adino.capstone.util.Constants.IMAGE_FILE_ABS_PATH;
 import static com.adino.capstone.util.Constants.PUSHED_REPORT_KEY;
 import static com.adino.capstone.util.Constants.REQUEST_CAMERA_PERMISSION;
 import static com.adino.capstone.util.Constants.REQUEST_IMAGE_INTENT;
+import static com.adino.capstone.util.Constants.REQUEST_PHONE_CALL_PERMISSION;
 import static com.adino.capstone.util.Constants.REQUEST_SIGN_IN;
 import static com.adino.capstone.util.Constants.REQUEST_VIDEO_INTENT;
 import static com.adino.capstone.util.Constants.USERS;
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
      */
     private boolean cameraPermissionGranted = false;
     private boolean storagePermissionGranted = false;
+    private boolean phonePermGranted = false;
     private boolean signedIn = false;
 
     private FirebaseAuth.AuthStateListener authStateListener;
@@ -303,42 +306,18 @@ public class MainActivity extends AppCompatActivity implements MapFragment.OnFra
                         startActivityForResult(toImageCaptureIntent, REQUEST_IMAGE_INTENT);
                     }
                 }
+                break;
+            case REQUEST_PHONE_CALL_PERMISSION:
+                if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(getApplicationContext(), "You cannot make calls without permission.",
+                            Toast.LENGTH_SHORT).show();
+                }else {
+                    phonePermGranted = true;
+                    navigation.setSelectedItemId(CONTACTS_NAV_ID);
+
+                }
+                break;
         }
-    }
-
-
-    /**
-     * Creates a file that captured image will be saved in
-     * @return Returns the created file
-     * @throws IOException Throws IO exception if file creation fails
-     */
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.ENGLISH).format(new Date());
-        String imageFileName = "PHOTO_" + timeStamp;
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        //File file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-        File image = File.createTempFile(
-                imageFileName,      /* prefix */
-                ".jpg",      /* suffix */
-                storageDir         /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = image.getAbsolutePath();
-        return image;
-    }
-
-
-    /**
-     * Adds the given image file to the gallery
-     * @param file Image file
-     */
-    private void addPicToGallery(File file) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(file);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
     }
 
     /**

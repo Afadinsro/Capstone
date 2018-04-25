@@ -1,9 +1,14 @@
 package com.adino.capstone.contacts;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,11 +17,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.adino.capstone.R;
 import com.adino.capstone.model.Agency;
 import com.adino.capstone.model.Report;
 import com.adino.capstone.reports.ReportViewHolder;
+import com.adino.capstone.util.Permissions;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import static com.adino.capstone.util.Constants.CONTACTS;
+import static com.adino.capstone.util.Constants.REQUEST_PHONE_CALL_PERMISSION;
 
 
 /**
@@ -50,6 +58,8 @@ public class ContactsFragment extends Fragment {
     private FirebaseRecyclerAdapter<Agency, AgencyViewHolder> adapter;
     private DatabaseReference contactsRef = FirebaseDatabase.getInstance().getReference().child(CONTACTS);
     private RecyclerView rv_contacts;
+
+    private boolean phonePermGranted = false;
 
 
     // TODO: Rename and change types of parameters
@@ -88,6 +98,12 @@ public class ContactsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         context = getContext();
+        String[] permissions = {Manifest.permission.CALL_PHONE};
+        phonePermGranted = Permissions.checkPermission(context, permissions[0]);
+        if(!phonePermGranted){
+            requestPermissions(permissions, REQUEST_PHONE_CALL_PERMISSION);
+        }
+
 
     }
 
@@ -116,7 +132,7 @@ public class ContactsFragment extends Fragment {
             @Override
             public AgencyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_contact, parent, false);
-                return new AgencyViewHolder(getContext(), view);
+                return new AgencyViewHolder(getContext(), getActivity(), view);
             }
         };
         rv_contacts.setAdapter(adapter);
@@ -155,6 +171,20 @@ public class ContactsFragment extends Fragment {
     public void onStop() {
         super.onStop();
         adapter.stopListening();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case REQUEST_PHONE_CALL_PERMISSION:
+                if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                    Toast.makeText(context, "You cannot make calls without permission.",
+                            Toast.LENGTH_SHORT).show();
+                }else {
+                    phonePermGranted = true;
+                }
+                break;
+        }
     }
 
     @Override

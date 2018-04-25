@@ -1,7 +1,12 @@
 package com.adino.capstone.contacts;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.net.Uri;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -15,8 +20,12 @@ import com.adino.capstone.R;
 import com.adino.capstone.glide.GlideApp;
 import com.adino.capstone.model.Agency;
 import com.adino.capstone.model.Report;
+import com.adino.capstone.util.Permissions;
 
 import java.util.ArrayList;
+
+import static com.adino.capstone.util.Constants.REQUEST_PHONE_CALL_PERMISSION;
+import static com.adino.capstone.util.Constants.SMS;
 
 /**
  * Created by afadinsro on 18/4/18.
@@ -30,15 +39,17 @@ public class AgencyViewHolder extends RecyclerView.ViewHolder implements View.On
     private TextView txtName;
     private TextView txtInfo;
     private Context context;
+    private Activity activity;
     private ArrayList<Agency> agencies = new ArrayList<>();
 
     private static final String TAG = "AgencyViewHolder";
 
 
-    AgencyViewHolder(Context context, View itemView) {
+    AgencyViewHolder(Context context, Activity activity, View itemView) {
         super(itemView);
         itemView.setOnClickListener(this);
         setContext(context);
+        this.activity = activity;
 
         CardView cvContact = (CardView) itemView.findViewById(R.id.item_cv_contact);
         imgPhoneIcon = (ImageView)itemView.findViewById(R.id.img_phone_icon);
@@ -53,10 +64,9 @@ public class AgencyViewHolder extends RecyclerView.ViewHolder implements View.On
      * @param model Report
      */
     void bindViewHolder(Agency model){
-
+        agencies.add(model);
         final String number =  "" + model.getPhone();
 
-        agencies.add(model);
         txtName.setText(model.getName());
         txtInfo.setText(model.getInfo());
         Log.d(TAG, "bindViewHolder: " + model.getImageURL());
@@ -70,17 +80,29 @@ public class AgencyViewHolder extends RecyclerView.ViewHolder implements View.On
         imgMessageIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Phone number: " + number, Toast.LENGTH_SHORT).show();
+                Intent msgIntent = new Intent(Intent.ACTION_VIEW, Uri.fromParts(SMS, number, null));
+                context.startActivity(msgIntent);
+//                Toast.makeText(context, "Phone number: " + number, Toast.LENGTH_SHORT).show();
             }
         });
 
         imgPhoneIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "Phone number: " + number, Toast.LENGTH_SHORT).show();
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                callIntent.setData(Uri.parse("tel:" + number));
+                String[] permissions = {Manifest.permission.CALL_PHONE};
+                boolean phonePermGranted = Permissions.checkPermission(context, permissions[0]);
+                if(!phonePermGranted){
+                    ActivityCompat.requestPermissions(activity, permissions, REQUEST_PHONE_CALL_PERMISSION);
+                }
+                context.startActivity(callIntent);
+//                Toast.makeText(context, "Phone number: " + number, Toast.LENGTH_SHORT).show();
             }
         });
     }
+
+
 
 
 
