@@ -347,18 +347,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         if(locationPermissionGranted){
             initSearchBar();
             getDeviceLocation();
-
-
-
-            //moveCamera(currentLocation, DEFAULT_ZOOM);
-
-
             try {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
             }catch (SecurityException e){
                 Log.d(TAG, "onMapReady: SecurityException" + e.getMessage());
             }
+
+            // Pin trending disasters
 
 
 

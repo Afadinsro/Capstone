@@ -10,6 +10,8 @@ public class Trending {
     private String imageURL;
     private String topic;
     private boolean status;
+    private double latitude;
+    private double longitude;
 
     /**
      * Default constructor
@@ -18,12 +20,15 @@ public class Trending {
     public Trending() {
     }
 
-    public Trending(String title, String details, String imageURL, String topic, boolean status) {
+    public Trending(String title, String details, String imageURL, String topic, boolean status,
+                    double latitude, double longitude) {
         setTitle(title);
         setDetails(details);
         setImageURL(imageURL);
         setStatus(status);
         setTopic(topic);
+        setLatitude(latitude);
+        setLongitude(longitude);
     }
 
     public String getTitle() {
@@ -64,5 +69,21 @@ public class Trending {
 
     public void setTopic(String topic) {
         this.topic = topic;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }
