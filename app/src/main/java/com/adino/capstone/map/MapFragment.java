@@ -347,7 +347,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onMapReady(final GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
         moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM, "My Location");
@@ -367,15 +367,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             trendingRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d(TAG, "onChildAdded: About to add marker for trending disasters...");
                     if(dataSnapshot.exists()) {
                         Trending trending = dataSnapshot.getValue(Trending.class);
-                        LatLng pos = new LatLng(trending.getLatitude(), trending.getLatitude());
+                        LatLng pos = new LatLng(trending.getLatitude(), trending.getLongitude());
                         MarkerOptions options = new MarkerOptions()
                                 .position(pos)
                                 .title(trending.getTitle());
                         // TODO: change default icon
 //                                .icon(null);
-                        googleMap.addMarker(options);
+                        map.addMarker(options);
                     }
                 }
 
