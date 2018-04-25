@@ -25,12 +25,14 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.adino.capstone.R;
+import com.adino.capstone.model.Trending;
 import com.adino.capstone.util.Permissions;
 import com.adino.capstone.util.Util;
 import com.google.android.gms.common.ConnectionResult;
@@ -45,9 +47,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -65,6 +70,7 @@ import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
+import static com.adino.capstone.util.Constants.TRENDING;
 import static com.adino.capstone.util.Constants.USERS;
 import static com.adino.capstone.util.Constants.USER_FIELD_LATITUDE;
 import static com.adino.capstone.util.Constants.USER_FIELD_LONGITUDE;
@@ -110,6 +116,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private DatabaseReference userReference = FirebaseDatabase.getInstance().getReference()
             .child(USERS).child(userID);
+    private DatabaseReference trendingRef = FirebaseDatabase.getInstance().getReference().child(TRENDING);
 
     private static final String TAG = "MapFragment";
     private boolean isGPSOn = false;
@@ -213,7 +220,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     }
                     Log.d(TAG, "onDataChange: Lat: " + latitude + ", Lng: " + longitude);
                     LatLng currentLocation = new LatLng(latitude, longitude);
-                    moveCamera(currentLocation, DEFAULT_ZOOM);
+                    moveCamera(currentLocation, DEFAULT_ZOOM, "My Location");
                 }
             }
 
@@ -262,6 +269,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 return false;
             }
         });
+        hideSoftKeyboard();
     }
 
     @Override
@@ -335,13 +343,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         super.onDetach();
         mListener = null;
         context = null;
+
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(final GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
-        moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM);
+        moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM, "My Location");
         map.setBuildingsEnabled(true);
 
         if(locationPermissionGranted){
@@ -355,7 +364,41 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
 
             // Pin trending disasters
+            trendingRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    if(dataSnapshot.exists()) {
+                        Trending trending = dataSnapshot.getValue(Trending.class);
+                        LatLng pos = new LatLng(trending.getLatitude(), trending.getLatitude());
+                        MarkerOptions options = new MarkerOptions()
+                                .position(pos)
+                                .title(trending.getTitle());
+                        // TODO: change default icon
+//                                .icon(null);
+                        googleMap.addMarker(options);
+                    }
+                }
 
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
 
 
         }
@@ -432,7 +475,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                                 userReference = FirebaseDatabase.getInstance().getReference().child(USERS).child(userID);
                                 userReference.child(USER_FIELD_LATITUDE).setValue(latLng.latitude);
                                 userReference.child(USER_FIELD_LONGITUDE).setValue(latLng.longitude);
-                                moveCamera(latLng, DEFAULT_ZOOM);
+                                moveCamera(latLng, DEFAULT_ZOOM, "My Location");
                             } else {
                                 Log.d(TAG, "onComplete: Couldn't find location");
                                 Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
@@ -466,15 +509,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             Address address = addresses.get(0);
             Log.d(TAG, "geoLocate: Location found: " + address.toString());
             LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            moveCamera(latLng, DEFAULT_ZOOM);
+            moveCamera(latLng, DEFAULT_ZOOM, address.getAddressLine(0));
+
             // An address was found
 
         }
+        hideSoftKeyboard();
     }
 
-    private void moveCamera(LatLng latLng, float zoom){
+    private void moveCamera(LatLng latLng, float zoom, String title){
         Log.d(TAG, "moveCamera: Moving the camera to lat: " + latLng.latitude + ", lng: " + latLng.longitude);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+        if(!title.equals("My Location")){
+            // Add marker
+            MarkerOptions options = new MarkerOptions()
+                    .position(latLng)
+                    .title(title);
+            map.addMarker(options);
+        }
+        hideSoftKeyboard();
+    }
+
+    private void hideSoftKeyboard(){
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams
+                .SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
 
