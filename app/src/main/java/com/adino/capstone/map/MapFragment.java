@@ -11,6 +11,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +48,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -68,6 +71,7 @@ import static android.content.Context.LOCATION_SERVICE;
 import static com.adino.capstone.util.Constants.DEFAULT_LATLNG_GBAWE;
 import static com.adino.capstone.util.Constants.DEFAULT_ZOOM;
 import static com.adino.capstone.util.Constants.ERROR_DIALOG_REQUEST;
+import static com.adino.capstone.util.Constants.GHANA;
 import static com.adino.capstone.util.Constants.REQUEST_GPS_ENABLE;
 import static com.adino.capstone.util.Constants.REQUEST_LOCATION_PERMISSION;
 import static com.adino.capstone.util.Constants.TRENDING;
@@ -106,6 +110,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private boolean locationPermissionGranted;
     private Context context;
     private AutoCompleteTextView txtSearch;
+    private ImageView imgGPS;
 
     private PlaceAutocompleteAdapter placeAutocompleteAdapter;
     private GoogleApiClient googleApiClient;
@@ -189,6 +194,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mapView = (MapView) view.findViewById(R.id.map);
         mapView.onCreate(savedInstanceState);
         txtSearch = (AutoCompleteTextView) view.findViewById(R.id.txt_search_field);
+        imgGPS = (ImageView) view.findViewById(R.id.img_gps);
         return view;
     }
 
@@ -269,6 +275,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 return false;
             }
         });
+
+        imgGPS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: GPS icon clicked.");
+                getDeviceLocation();
+            }
+        });
+
         hideSoftKeyboard();
     }
 
@@ -350,12 +365,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: Map is ready");
         map = googleMap;
-        moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM, "My Location");
+        // Fix map to Ghana
+        map.setLatLngBoundsForCameraTarget(GHANA);
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(GHANA, 50));
+        //moveCamera(DEFAULT_LATLNG_GBAWE, DEFAULT_ZOOM, "My Location");
         map.setBuildingsEnabled(true);
 
         if(locationPermissionGranted){
             initSearchBar();
-            getDeviceLocation();
             try {
                 map.setMyLocationEnabled(true);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -476,7 +493,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                                 userReference = FirebaseDatabase.getInstance().getReference().child(USERS).child(userID);
                                 userReference.child(USER_FIELD_LATITUDE).setValue(latLng.latitude);
                                 userReference.child(USER_FIELD_LONGITUDE).setValue(latLng.longitude);
-                                moveCamera(latLng, DEFAULT_ZOOM, "My Location");
+                                CameraPosition cameraPosition = new CameraPosition(latLng, DEFAULT_ZOOM, 0, 65);
+                                moveCamera(cameraPosition,"My Location");
                             } else {
                                 Log.d(TAG, "onComplete: Couldn't find location");
                                 Toast.makeText(getContext(), "Unable to get current location.", Toast.LENGTH_SHORT).show();
@@ -510,7 +528,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             Address address = addresses.get(0);
             Log.d(TAG, "geoLocate: Location found: " + address.toString());
             LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-            moveCamera(latLng, DEFAULT_ZOOM, address.getAddressLine(0));
+            CameraPosition cameraPosition = new CameraPosition(latLng, DEFAULT_ZOOM, 0, 65);
+            moveCamera(cameraPosition, address.getAddressLine(0));
 
             // An address was found
 
@@ -529,6 +548,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             map.addMarker(options);
         }
         hideSoftKeyboard();
+    }
+
+    /**
+     * Move camera with animation
+     * @param position
+     * @param title
+     */
+    private void moveCamera(CameraPosition position, String title){
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(position));
+        //map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
+        if(!title.equals("My Location")){
+            // Add marker
+            MarkerOptions options = new MarkerOptions()
+                    .position(position.target)
+                    .title(title);
+            map.addMarker(options);
+        }
     }
 
     private void hideSoftKeyboard(){

@@ -46,4 +46,19 @@
 
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/img_gps"
+        android:layout_width="@dimen/material_40"
+        android:layout_height="@dimen/material_40"
+        android:layout_gravity="end"
+        android:layout_marginEnd="@dimen/material_16"
+        android:contentDescription="@string/default_content_description"
+        android:layout_marginTop="@dimen/material_96"
+        app:srcCompat="@drawable/ic_gps_fixed_black_24dp"
+        android:scaleType="centerCrop"
+        android:focusable="true"
+        android:clickable="true"
+        android:background="@color/white"
+        android:padding="@dimen/material_4"/>
+
 </FrameLayout>
