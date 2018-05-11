@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.adino.capstone">
+    package="com.adino.disasteraide">
 
     <!-- PERMISSIONS -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -59,7 +59,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.adino.capstone.fileprovider"
+            android:authorities="com.adino.disasteraide.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

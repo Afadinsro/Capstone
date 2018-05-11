@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.adino.capstone.map.MapFragment">
+    tools:context="com.adino.disasteraide.map.MapFragment">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/map"

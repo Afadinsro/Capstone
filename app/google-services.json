@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "541277844336",
+    "firebase_url": "https://disaster-aide.firebaseio.com",
+    "project_id": "disaster-aide",
+    "storage_bucket": "disaster-aide.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:541277844336:android:57f13dddb253b617",
+        "android_client_info": {
+          "package_name": "com.adino.disasteraide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "541277844336-mm8gndfquc9g9jurc5ddpcq3nkvefrnm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adino.disasteraide",
+            "certificate_hash": "365b5e4f45e7d5dbd297cfdb8f185224e40c3488"
+          }
+        },
+        {
+          "client_id": "541277844336-f9tlsiusvdc1blufjcmqpgs41adhvbir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfQ4VgHOGiLUW39c1gSAOt9nJCTmyF4Dw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "541277844336-f9tlsiusvdc1blufjcmqpgs41adhvbir.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
